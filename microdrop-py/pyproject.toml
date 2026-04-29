@@ -34,6 +34,7 @@ packages = [
     "src/microdrop_utils",
     "src/microdrop_application",
     "src/pluggable_protocol_tree",
+    "src/video_protocol_controls",
     "src/examples"
 ]
 
