@@ -7,6 +7,10 @@ param (
     [switch]$Stash
 )
 
+# Set the console window title (re-asserted here so it sticks even when the
+# .ps1 is launched directly, not just via the .bat wrappers).
+$Host.UI.RawUI.WindowTitle = "Microdrop (Beta)"
+
 # Configuration: Paths
 # Parent module path (microdrop-py)
 $parentPath = Join-Path -Path $PSScriptRoot -ChildPath "microdrop-py"
@@ -47,12 +51,12 @@ if (Test-Path -Path $parentPath) {
 
     if ($Stash) {
         Write-Host "Stashing uncommitted changes in parent module..." -ForegroundColor DarkYellow
-        Invoke-Git stash
+#         Invoke-Git stash
     }
 
     # We attempt to pull the parent repo
     Write-Host "Pulling latest changes for parent..." -ForegroundColor Cyan
-    Invoke-Git pull
+#     Invoke-Git pull
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Warning: Could not pull parent module. Continuing..." -ForegroundColor DarkYellow
     }

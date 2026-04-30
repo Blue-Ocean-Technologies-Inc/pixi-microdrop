@@ -3,9 +3,9 @@
 :: It bypasses the local execution policy for this specific run,
 :: so it works even if you haven't set the system-wide policy.
 
-TITLE PowerShell Launcher
+TITLE Microdrop (Beta)
 
-ECHO Launching PowerShell script...
+ECHO Launching Microdrop (Beta)...
 ECHO.
 
 :: "%~dp0" refers to the folder where this .bat file is located.

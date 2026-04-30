@@ -9,6 +9,10 @@ MAGENTA='\033[0;35m'
 GRAY='\033[0;90m'
 NC='\033[0m'
 
+# Set the terminal window title (xterm/VTE escape; ignored by terminals that
+# don't support it).
+echo -ne '\033]0;Microdrop (Beta)\007'
+
 # Configuration:
 export QT_MEDIA_BACKEND=gstreamer
 systemctl --user stop wireplumber
@@ -42,10 +46,10 @@ if [ -d "$PARENT_PATH" ]; then
     cd "$PARENT_PATH" || exit 1
 
     echo -e "${YELLOW}Stashing uncommitted changes in parent module...${NC}"
-    pixi run git stash
+#    pixi run git stash
 
     echo -e "${CYAN}Running 'pixi run git pull' on parent...${NC}"
-    pixi run git pull || echo -e "${YELLOW}Warning: Could not pull parent module. Continuing...${NC}"
+#    pixi run git pull || echo -e "${YELLOW}Warning: Could not pull parent module. Continuing...${NC}"
     echo -e "${CYAN}----------------------------------------${NC}"
 else
     echo -e "${YELLOW}Warning: Parent path not found at $PARENT_PATH${NC}"
