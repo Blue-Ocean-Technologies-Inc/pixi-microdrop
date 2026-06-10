@@ -25,6 +25,29 @@ user-invocable: false
 - Topic constants defined in module `consts.py` files
 - MQTT-style topic matching for subscriptions
 
+## Plugin Decoupling (inter-plugin communication)
+- Plugins MUST NOT reference other plugins directly. Forbidden: reaching into
+  another plugin's pane/model (`window.get_dock_pane("other.dock_pane").model...`),
+  or importing/instantiating another plugin's classes/preferences at runtime.
+- Communicate strictly via Dramatiq topics, OR read shared state from the
+  Redis-backed app_globals (`get_microdrop_redis_globals_manager()`).
+- "Owner publishes": the plugin that owns a piece of data publishes it to
+  app_globals (or a topic); consumers READ it — they never reach back for it.
+  app_globals key constants live in the owning plugin's `consts.py`, aggregated
+  into `APP_GLOBALS_KEYS`. Importing those key constants cross-plugin is OK
+  (constants only); importing message-schema models for a topic payload is OK
+  (it is the pub/sub contract).
+- Bind the app_globals manager once at MODULE level
+  (`app_globals = get_microdrop_redis_globals_manager()`); the proxy connects
+  lazily. Wrap reads/writes that must tolerate no-Redis (tests/headless) in
+  `try/except`. Note Redis JSON-stringifies dict keys (e.g. int channel ids
+  round-trip to str) — convert back at the read site.
+
+## Constants & consts.py
+- Subpackages carry their OWN `consts.py` rather than inlining module-level
+  magic constants/strings; name distinct formats distinctly.
+- Constants: UPPER_SNAKE_CASE.
+
 ## UI Patterns
 - Views use PySide6 widgets or Pyface TraitsUI views
 - Qt layouts (QVBoxLayout, QHBoxLayout, QFormLayout) for widget arrangement
@@ -38,8 +61,16 @@ user-invocable: false
 - Plugins: `<module_name>.plugin.Plugin` class
 
 ## Forbidden Patterns
-- Never import Qt directly in service/model layers — only in views
-- Never use plain instance variables for state — always use Traits
+- Never import Qt directly in service/model layers — only in views. Inject any
+  Qt-aware collaborator (e.g. a flush scheduler) from the view; give services a
+  Qt-free default (e.g. `threading.Timer`).
+- Never use plain instance variables for state — always use Traits. Convert
+  STATEFUL classes to `HasTraits` (class-level trait declarations, `traits_init`
+  in place of `__init__`, `_x_default` methods). Stateless utility classes
+  (only static/class methods) stay plain.
+- Never import inside functions to dodge a dependency — hoist to module top, or
+  remove the dependency by decoupling (see Plugin Decoupling).
+- Never reach into another plugin (see Plugin Decoupling).
 - Never publish messages outside Dramatiq workers in backend code
 - Never use `exec()` for PySide6 dialogs — use `show()` with timeout instead
 - Never modify `pixi.lock` directly — use `pixi add` commands
