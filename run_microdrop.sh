@@ -9,6 +9,14 @@ MAGENTA='\033[0;35m'
 GRAY='\033[0;90m'
 NC='\033[0m'
 
+# Parse arguments
+USE_SYSTEM_REDIS=false
+for arg in "$@"; do
+    if [[ "$arg" == "--system_redis" ]]; then
+        USE_SYSTEM_REDIS=true
+    fi
+done
+
 # Set the terminal window title (xterm/VTE escape; ignored by terminals that
 # don't support it).
 echo -ne '\033]0;Microdrop (Beta)\007'
@@ -68,6 +76,37 @@ if [ -d "$TARGET_PATH" ]; then
     # pixi run git checkout "$BRANCH"
     pixi run git pull
     echo -e "${CYAN}----------------------------------------${NC}"
+
+    # --- Launch System Redis if requested ---
+    if [ "$USE_SYSTEM_REDIS" = true ]; then
+        echo -e "${MAGENTA}Starting system-level redis-server...${NC}"
+        
+        # Verify redis-server exists on the system before trying to run it
+        if command -v redis-server &> /dev/null; then
+            # Run redis-server in the background, pipe logs to a temp file
+            redis-server > /tmp/microdrop_redis.log 2>&1 &
+            REDIS_PID=$!
+            
+            # Give Redis a second to initialize or fail
+            sleep 1
+            
+            # Check if the Redis process is still alive
+            if ! kill -0 $REDIS_PID 2>/dev/null; then
+                echo -e "${RED}Error: system-level redis-server failed to start!${NC}"
+                echo -e "${YELLOW}--- Redis Error Log ---${NC}"
+                cat /tmp/microdrop_redis.log
+                echo -e "${YELLOW}-----------------------${NC}"
+                echo -e "${RED}Quitting launcher.${NC}"
+                exit 1
+            fi
+            
+            # Catch exits to clean up background Redis
+            trap 'echo -e "\n${YELLOW}Stopping system-level redis-server (PID: $REDIS_PID)...${NC}"; kill $REDIS_PID 2>/dev/null' EXIT SIGINT SIGTERM
+        else
+            echo -e "${RED}Error: 'redis-server' command not found on the system. Is it installed?${NC}"
+            exit 1
+        fi
+    fi
 
     echo -e "${MAGENTA}Starting Microdrop...${NC}"
     pixi run microdrop
