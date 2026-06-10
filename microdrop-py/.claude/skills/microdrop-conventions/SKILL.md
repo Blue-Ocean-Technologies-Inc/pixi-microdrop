@@ -47,6 +47,28 @@ user-invocable: false
 - Subpackages carry their OWN `consts.py` rather than inlining module-level
   magic constants/strings; name distinct formats distinctly.
 - Constants: UPPER_SNAKE_CASE.
+- NEVER define a constant mid-file (e.g. a frozenset between two methods in a
+  1500-line view). Constants go in the package `consts.py` (or, for tiny
+  single-consumer values, at the very top of the module below the imports).
+
+## Helper Function Placement
+- Generic, reusable helpers do NOT live as module-level functions inside view
+  or service files. Move them to `microdrop_utils/` — find the existing module
+  that fits the category first (`decorators.py` for decorators,
+  `pyside_helpers.py`, `pyface_helpers.py`, `preferences_UI_helpers.py`,
+  `json_helpers.py`, ...); create a new aptly-named module only when none fit.
+- Helpers that merely derive a value from a model object belong ON that model
+  class as a method (e.g. dotted-path display id = `row.dotted_path()` on
+  `BaseRow`, not a free `_dotted_path(row)` floating in a view module).
+- One copy only: if two modules need the same helper, that is the signal it
+  belongs in `microdrop_utils` or on the shared model — never duplicate it.
+
+## Plugin Standalone Rule (protocol_grid vs pluggable_protocol_tree)
+- protocol_grid (legacy) and pluggable_protocol_tree must each be fully
+  functional when loaded ALONE. Never make one import from / re-export through
+  the other. Ported code gets its own copy + protocol_tree-scheme names (e.g.
+  `protocol_tree_tab`, id `microdrop.protocol_tree.preferences`); protocol_grid
+  stays untouched until PPT-9 deletes it.
 
 ## UI Patterns
 - Views use PySide6 widgets or Pyface TraitsUI views
@@ -74,3 +96,5 @@ user-invocable: false
 - Never publish messages outside Dramatiq workers in backend code
 - Never use `exec()` for PySide6 dialogs — use `show()` with timeout instead
 - Never modify `pixi.lock` directly — use `pixi add` commands
+- Never use `logging.getLogger(__name__)` — always
+  `from logger.logger_service import get_logger; logger = get_logger(__name__)`
