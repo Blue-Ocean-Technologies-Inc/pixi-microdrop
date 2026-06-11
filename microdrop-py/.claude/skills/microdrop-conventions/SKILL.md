@@ -59,6 +59,13 @@ user-invocable: false
   consumer imports it from the owner's `consts.py` under its original,
   descriptive name (e.g. `DEFAULT_LOGS_SETTLING_SECONDS`, never aliased
   to `DEFAULT_SETTLING_TIME_S`).
+- Never introduce a NEW constant or variable when an existing one already
+  expresses the value. The pyface dialogs (`confirm()` and the other
+  `pyface_wrapper` dialogs) already return `YES` / `NO` / `CANCEL` — wrappers
+  return that result directly and callers compare against those codes; do
+  not mint parallel decision constants (a `PROCEED`/`CANCEL` pair mapping
+  1:1 onto them was reviewed and removed). Same for locals: return a call's
+  result directly rather than staging it in a variable first.
 
 ## Helper Function Placement
 - Generic, reusable helpers do NOT live as module-level functions inside view
