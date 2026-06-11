@@ -4,6 +4,10 @@ description: Envisage/Traits/PySide6 code conventions for MicroDrop. Apply when 
 user-invocable: false
 ---
 
+> Apply these conventions PROACTIVELY while writing new code — they are
+> not a cleanup checklist to retrofit later. The user runs periodic
+> directive sweeps over PRs; code that already follows them passes.
+
 ## Architecture
 - Three-layer, message-driven: Frontend (PySide6/Qt6) <-> Message Server (Redis/Dramatiq) <-> Backend (DropBot Controller)
 - Entire app is plugin-based using Envisage framework
@@ -50,6 +54,11 @@ user-invocable: false
 - NEVER define a constant mid-file (e.g. a frozenset between two methods in a
   1500-line view). Constants go in the package `consts.py` (or, for tiny
   single-consumer values, at the very top of the module below the imports).
+- One constant, ONE name. Never re-export or `import X as Y`-alias a
+  constant under a different (especially shorter/vaguer) name — every
+  consumer imports it from the owner's `consts.py` under its original,
+  descriptive name (e.g. `DEFAULT_LOGS_SETTLING_SECONDS`, never aliased
+  to `DEFAULT_SETTLING_TIME_S`).
 
 ## Helper Function Placement
 - Generic, reusable helpers do NOT live as module-level functions inside view
@@ -76,6 +85,10 @@ user-invocable: false
 - Collapsible sections use custom GroupBox patterns
 
 ## Naming Conventions
+- The more descriptive the name, the better — for variables, constants,
+  functions and traits alike. Prefer `realtime_mode_settling_time_s` over
+  `settle_s`; spell out units and subject. Never trade descriptiveness
+  for brevity.
 - Interfaces: `I` prefix (IMainModel, IRouteExecutionService)
 - Constants: UPPER_SNAKE_CASE in `consts.py` per module
 - Trait defaults: `_trait_name_default()` method
@@ -98,3 +111,7 @@ user-invocable: false
 - Never modify `pixi.lock` directly — use `pixi add` commands
 - Never use `logging.getLogger(__name__)` — always
   `from logger.logger_service import get_logger; logger = get_logger(__name__)`
+- Never bare `except: pass` and never `print()` for errors — catch
+  `Exception` only and log it (`logger.debug(...)` for tolerated no-Redis
+  paths, `logger.warning(...)` otherwise, `exc_info=True` when the stack
+  matters).
