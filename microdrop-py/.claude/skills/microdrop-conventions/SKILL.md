@@ -65,7 +65,10 @@ user-invocable: false
   return that result directly and callers compare against those codes; do
   not mint parallel decision constants (a `PROCEED`/`CANCEL` pair mapping
   1:1 onto them was reviewed and removed). Same for locals: return a call's
-  result directly rather than staging it in a variable first.
+  result directly rather than staging it in a variable first. Same for
+  thin wrapper methods: a helper whose whole body is a one-line idiom
+  (e.g. `x or cls()`) gets inlined at its call sites — dedup earns a
+  shared helper only when the logic is more than an idiom.
 
 ## Helper Function Placement
 - Generic, reusable helpers do NOT live as module-level functions inside view
