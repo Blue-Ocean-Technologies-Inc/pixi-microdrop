@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="IssueNavigationConfiguration">
+    <option name="links">
+      <list>
+        <IssueNavigationLink>
+          <option name="issueRegexp" value="(issue) #(\d+)" />
+          <option name="linkRegexp" value="https://github.com/Blue-Ocean-Technologies-Inc/Microdrop/issues/$2" />
+        </IssueNavigationLink>
+        <IssueNavigationLink>
+          <option name="issueRegexp" value="(PR) #(\d+)" />
+          <option name="linkRegexp" value="https://github.com/Blue-Ocean-Technologies-Inc/Microdrop/pull/$2" />
+        </IssueNavigationLink>
+      </list>
+    </option>
+  </component>
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/microdrop-py/src" vcs="Git" />
