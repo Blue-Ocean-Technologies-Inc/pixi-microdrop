@@ -1,0 +1,21 @@
+# IDE
+.idea/
+
+# Agent / scratch working dirs
+.superpowers/
+microdrop-py/scratch/
+microdrop-py/logging_manual_test_output/
+
+# pixi environment + caches
+.pixi/
+**/.pixi/
+
+# local environment helpers (machine-specific)
+microdrop-py/env/
+microdrop-py/activate.bat
+microdrop-py/environment.ps1
+microdrop-py/environment.tar
+
+# Python
+__pycache__/
+*.pyc
