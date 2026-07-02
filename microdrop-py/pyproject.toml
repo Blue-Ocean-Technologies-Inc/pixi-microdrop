@@ -22,44 +22,33 @@ libc = { family = "glibc", version = "2.31" }
 [tool.pixi.pypi-dependencies]
 microdrop_py = { path = ".", editable = true }
 
-# Every top-level package under src/ (dirs with an __init__.py). Keep this in
-# sync when packages are added/extracted — installed plugin packages (heater,
-# magnet) import these (microdrop_utils, template_status_and_controls,
-# peripheral_device_controller_base, ...), so a missing entry breaks a
-# non-editable install.
+# Ship every package under src/ automatically (`sources` strips the src/
+# prefix, so src/foo installs as foo). New packages are picked up without
+# touching this file; only NON-package items at the src root need excluding —
+# and forgetting one ships harmless extras instead of breaking installs
+# (installed plugin packages import microdrop_utils,
+# template_status_and_controls, peripheral_device_controller_base, ...).
 [tool.hatch.build.targets.wheel]
-packages = [
-    "src/BlankMicrodropCanvas",
-    "src/device_viewer",
-    "src/dropbot_controller",
-    "src/dropbot_preferences_ui",
-    "src/dropbot_protocol_controls",
-    "src/dropbot_status_and_controls",
-    "src/dropbot_tools_menu",
-    "src/electrode_controller",
-    "src/examples",
-    "src/integrated_ssh_portal",
-    "src/logger",
-    "src/logger_ui",
-    "src/manual_controls",
-    "src/message_router",
-    "src/microdrop_application",
-    "src/microdrop_style",
-    "src/microdrop_utils",
-    "src/mock_dropbot_controller",
-    "src/mock_dropbot_status",
-    "src/opendrop_controller",
-    "src/opendrop_status_and_controls",
-    "src/peripheral_device_controller_base",
-    "src/pluggable_protocol_tree",
-    "src/plugin_management",
-    "src/protocol_quick_action_tools",
-    "src/ssh_controls",
-    "src/ssh_controls_ui",
-    "src/template_status_and_controls",
-    "src/user_help_plugin",
-    "src/video_protocol_controls",
-    "src/volume_threshold_protocol_controls",
+only-include = ["src"]
+sources = ["src"]
+exclude = [
+    # non-package dirs at the src root
+    "src/docs",
+    "src/graphify-out",
+    "src/logging_manual_test_output",
+    "src/patches",
+    "src/dropbot_status",       # __pycache__-only ghost of a deleted package
+    "src/opendrop_status",      # __pycache__-only ghost of a deleted package
+    # hidden entries at the src root (.github, .gitignore, .superpowers, ...)
+    "src/.*",
+    # loose files at the src root (would land in site-packages root)
+    "src/*.md",
+    "src/*.json",
+    "src/*.yml",
+    "src/*.py",
+    "src/LICENSE",
+    "src/pyinstaller.spec",
+    "**/__pycache__",
 ]
 
 # --- Shared Dependencies ---
