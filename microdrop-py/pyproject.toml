@@ -22,21 +22,44 @@ libc = { family = "glibc", version = "2.31" }
 [tool.pixi.pypi-dependencies]
 microdrop_py = { path = ".", editable = true }
 
+# Every top-level package under src/ (dirs with an __init__.py). Keep this in
+# sync when packages are added/extracted — installed plugin packages (heater,
+# magnet) import these (microdrop_utils, template_status_and_controls,
+# peripheral_device_controller_base, ...), so a missing entry breaks a
+# non-editable install.
 [tool.hatch.build.targets.wheel]
 packages = [
+    "src/BlankMicrodropCanvas",
     "src/device_viewer",
     "src/dropbot_controller",
-    "src/dropbot_status",
+    "src/dropbot_preferences_ui",
+    "src/dropbot_protocol_controls",
+    "src/dropbot_status_and_controls",
     "src/dropbot_tools_menu",
     "src/electrode_controller",
+    "src/examples",
+    "src/integrated_ssh_portal",
+    "src/logger",
+    "src/logger_ui",
     "src/manual_controls",
     "src/message_router",
-    "src/microdrop_utils",
     "src/microdrop_application",
+    "src/microdrop_style",
+    "src/microdrop_utils",
+    "src/mock_dropbot_controller",
+    "src/mock_dropbot_status",
+    "src/opendrop_controller",
+    "src/opendrop_status_and_controls",
+    "src/peripheral_device_controller_base",
     "src/pluggable_protocol_tree",
+    "src/plugin_management",
+    "src/protocol_quick_action_tools",
+    "src/ssh_controls",
+    "src/ssh_controls_ui",
+    "src/template_status_and_controls",
+    "src/user_help_plugin",
     "src/video_protocol_controls",
     "src/volume_threshold_protocol_controls",
-    "src/examples"
 ]
 
 # --- Shared Dependencies ---
