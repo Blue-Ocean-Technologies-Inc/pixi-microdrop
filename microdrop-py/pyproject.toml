@@ -21,6 +21,8 @@ libc = { family = "glibc", version = "2.31" }
 
 [tool.pixi.pypi-dependencies]
 microdrop_py = { path = ".", editable = true }
+heater_microdrop_plugin = { path = "src/heater-microdrop-plugin-py", editable = true }
+magnet_microdrop_plugin = { path = "src/magnet-microdrop-plugin-py", editable = true }
 
 # Ship every package under src/ automatically (`sources` strips the src/
 # prefix, so src/foo installs as foo). New packages are picked up without
@@ -79,7 +81,6 @@ pygame = ">=2.6"
 paramiko = ">=4.0.0,<5"
 pandas = ">=2.0,<3"
 black = ">=26.5.1,<27"
-magnet-microdrop-plugin = ">=1.0.0,<2"
 
 # --- TARGET: Windows (win-64) ---
 [tool.pixi.target.win-64.dependencies]
