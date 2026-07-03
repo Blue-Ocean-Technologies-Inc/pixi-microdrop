@@ -21,8 +21,13 @@ libc = { family = "glibc", version = "2.31" }
 
 [tool.pixi.pypi-dependencies]
 microdrop_py = { path = ".", editable = true }
+
+[tool.pixi.feature.test.pypi-dependencies]
 heater_microdrop_plugin = { path = "src/heater-microdrop-plugin-py", editable = true }
 magnet_microdrop_plugin = { path = "src/magnet-microdrop-plugin-py", editable = true }
+
+[tool.pixi.environments]
+test = ["test"]
 
 # Ship every package under src/ automatically (`sources` strips the src/
 # prefix, so src/foo installs as foo). New packages are picked up without
