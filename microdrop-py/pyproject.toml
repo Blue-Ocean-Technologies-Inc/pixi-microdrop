@@ -21,13 +21,14 @@ libc = { family = "glibc", version = "2.31" }
 
 [tool.pixi.pypi-dependencies]
 microdrop_py = { path = ".", editable = true }
-
-[tool.pixi.feature.test.pypi-dependencies]
+#
+#[tool.pixi.feature.test.pypi-dependencies]
 heater_microdrop_plugin = { path = "src/heater-microdrop-plugin-py", editable = true }
 magnet_microdrop_plugin = { path = "src/magnet-microdrop-plugin-py", editable = true }
+fluorescence_microdrop_plugin = { path = "src/fluorescence-microdrop-plugin-py", editable = true }
 
-[tool.pixi.environments]
-test = ["test"]
+#[tool.pixi.environments]
+#test = ["test"]
 
 # Ship every package under src/ automatically (`sources` strips the src/
 # prefix, so src/foo installs as foo). New packages are picked up without
@@ -100,6 +101,9 @@ redis-server = ">=6.0.0"
 redis-server = ">=6.0.0"
 
 [tool.pixi.tasks]
+# One command for new clones: installs the shared git hooks (commit-message
+# format, scratch-file block, syntax check) into all three repos. Idempotent.
+setup-hooks = { cmd = "pixi exec --spec pre-commit -- pre-commit install --hook-type commit-msg --hook-type pre-commit && cd heater-microdrop-plugin-py && pixi exec --spec pre-commit -- pre-commit install --hook-type commit-msg --hook-type pre-commit && cd ../magnet-microdrop-plugin-py && pixi exec --spec pre-commit -- pre-commit install --hook-type commit-msg --hook-type pre-commit && cd ../fluorescence-microdrop-plugin-py && pixi exec --spec pre-commit -- pre-commit install --hook-type commit-msg --hook-type pre-commit", cwd = "src" }
 opendrop-microdrop = { cmd = "python run_device_viewer_pluggable.py --device opendrop", cwd = "src/examples/" }
 opendrop-microdrop-backend = { cmd = "python run_device_viewer_pluggable_backend.py --device opendrop", cwd = "src/examples/" }
 opendrop-microdrop-frontend = { cmd = "python run_device_viewer_pluggable_frontend.py --device opendrop", cwd = "src/examples/" }
