@@ -27,6 +27,16 @@ if (-not (Get-Command "pixi" -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
+# Keep pixi itself current before it updates/launches everything else.
+Write-Host "Updating pixi..." -ForegroundColor Cyan
+& pixi self-update
+if ($LASTEXITCODE -ne 0) {
+    # Non-fatal: self-update is unavailable for some install methods
+    # (conda/scoop-managed pixi), and an old-but-working pixi can still launch.
+    Write-Host "Warning: pixi self-update failed. Continuing with the current version..." -ForegroundColor DarkYellow
+}
+Write-Host "----------------------------------------" -ForegroundColor Cyan
+
 # Determine whether to use system git directly or fall back to pixi run git
 if (Get-Command "git" -ErrorAction SilentlyContinue) {
     $git = "git"

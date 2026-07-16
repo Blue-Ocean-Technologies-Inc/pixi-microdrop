@@ -48,6 +48,13 @@ if ! command -v pixi &> /dev/null; then
     exit 1
 fi
 
+# Keep pixi itself current before it updates/launches everything else.
+# Non-fatal: self-update is unavailable for some install methods (package-
+# manager-managed pixi), and an old-but-working pixi can still launch.
+echo -e "${CYAN}Updating pixi...${NC}"
+pixi self-update || echo -e "${YELLOW}Warning: pixi self-update failed. Continuing with the current version...${NC}"
+echo -e "${CYAN}----------------------------------------${NC}"
+
 # --- Step 1: Update Parent Module (microdrop-py) ---
 if [ -d "$PARENT_PATH" ]; then
     echo -e "${YELLOW}Updating Parent Module: $PARENT_PATH${NC}"
