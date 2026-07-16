@@ -89,6 +89,17 @@ if (Test-Path -Path $targetPath) {
         Invoke-Git stash
     }
 
+    # A freshly-initialized submodule sits on a detached HEAD, where
+    # `git pull` refuses to run — force a checkout of main in that case.
+    $srcBranch = (Invoke-Git branch --show-current) | Select-Object -First 1
+    if ([string]::IsNullOrWhiteSpace($srcBranch)) {
+        Write-Host "No branch checked out in src (detached HEAD); checking out main..." -ForegroundColor DarkYellow
+        Invoke-Git checkout main
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "Warning: Could not check out main. Continuing..." -ForegroundColor DarkYellow
+        }
+    }
+
     # Pull latest changes for the src submodule
     Write-Host "Pulling latest changes for src..." -ForegroundColor Cyan
     Invoke-Git pull

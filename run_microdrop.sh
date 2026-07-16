@@ -78,9 +78,15 @@ if [ -d "$TARGET_PATH" ]; then
     echo -e "${YELLOW}Stashing uncommitted changes in src module...${NC}"
     pixi run git stash
 
-    # dynamically checking out the correct branch
+    # A freshly-initialized submodule sits on a detached HEAD, where
+    # `git pull` refuses to run — force a checkout of main in that case.
+    SRC_BRANCH=$(pixi run git branch --show-current)
+    if [ -z "$SRC_BRANCH" ]; then
+        echo -e "${YELLOW}No branch checked out in src (detached HEAD); checking out main...${NC}"
+        pixi run git checkout main || echo -e "${YELLOW}Warning: Could not check out main. Continuing...${NC}"
+    fi
+
     echo -e "${CYAN}Checking for src updates on current branch...${NC}"
-    # pixi run git checkout "$BRANCH"
     pixi run git pull
     echo -e "${CYAN}----------------------------------------${NC}"
 
