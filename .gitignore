@@ -8,3 +8,6 @@ magnet-microdrop-plugin-py/
 # Scratch
 .superpowers/
 scratch/
+
+# Built by CI (release-setup-exe workflow) — download from GitHub Releases
+microdrop_setup.exe
