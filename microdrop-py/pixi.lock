@@ -357,7 +357,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/yaml-0.2.5-h925e9cb_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-ng-2.3.3-hed4e4f5_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.7-hbf9d68e_6.conda
-      - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.0.0-pyh4616a5c_0.conda
+      - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.1.1-pyh4616a5c_0.conda
       - pypi: ./
       - pypi: https://files.pythonhosted.org/packages/08/21/41960c03721a99e7be99a96ebb8570bdfd6f76f512b5d09074365e27ce28/pyside6_essentials-6.9.2-cp39-abi3-macosx_12_0_universal2.whl
       - pypi: https://files.pythonhosted.org/packages/0b/d7/1959b9648791274998a9c3526f6d0ec8fd2233e4d4acce81bbae76b44b2a/python_dotenv-1.2.2-py3-none-any.whl
@@ -727,7 +727,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/wcwidth-0.6.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/whichcraft-0.6.1-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-3.23.0-pyhcf101f3_1.conda
-      - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.0.0-pyh4616a5c_0.conda
+      - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.1.1-pyh4616a5c_0.conda
       - pypi: ./
       - pypi: https://files.pythonhosted.org/packages/0b/d7/1959b9648791274998a9c3526f6d0ec8fd2233e4d4acce81bbae76b44b2a/python_dotenv-1.2.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/13/cd/e9a6d0aa8794f777627a9fb3cffed0ac8449881b33e2325b5bcff10c36bc/shiboken6-6.8.0.2-cp39-abi3-manylinux_2_31_aarch64.whl
@@ -1031,7 +1031,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-ng-2.3.3-h0261ad2_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.7-h534d264_6.conda
       - conda: https://conda.anaconda.org/vignesh229/win-64/redis-server-3.0.501-0.tar.bz2
-      - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.0.0-pyh4616a5c_0.conda
+      - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.1.1-pyh4616a5c_0.conda
       - pypi: ./
       - pypi: https://files.pythonhosted.org/packages/0b/d7/1959b9648791274998a9c3526f6d0ec8fd2233e4d4acce81bbae76b44b2a/python_dotenv-1.2.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/14/fa/396a2e86230c493b565e2dc89dc64e4b1c63582ac69afe77b693c3817a53/pyside6_addons-6.9.2-cp39-abi3-win_amd64.whl
@@ -10719,15 +10719,15 @@ packages:
   sha256: 89ed9bff629ef5fbd675dc66ccdc8f17ac42fa2b9e09e562f19fb524c7316206
   md5: daf7a61a1ffa981b7d1a04254d5b668c
   size: 1197938
-- conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.0.0-pyh4616a5c_0.conda
-  sha256: 53ec10ee5d38e7d168a44f3eca05035c69a7e8835f533e6874824d44f0869d3f
-  md5: c65d8081f56b750eac37e2ba0ce79059
+- conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.1.1-pyh4616a5c_0.conda
+  sha256: 21eccfad1b0a43f46b502b4ec6812e27632daacfb6faa9a79462522b4b1fb27e
+  md5: e1d3772f6fb8f2e01d5621eec0811086
   depends:
   - python >=3.11
   - python *
   run_exports: {}
-  size: 29300
-  timestamp: 1783030715114
+  size: 29477
+  timestamp: 1784135128539
 - pypi: ./
   name: microdrop-py
   requires_dist:
