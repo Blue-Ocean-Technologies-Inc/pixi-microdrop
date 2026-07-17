@@ -35,7 +35,7 @@ if ($Device) { $runArgs += @("--device", $Device) }
 if ($MicrodropArgs) { $runArgs += $MicrodropArgs }
 
 Write-Host "Starting Microdrop..." -ForegroundColor Magenta
-& pixi run microdrop @runArgs
+& pixi run microdrop_launch @runArgs
 
 Write-Host "----------------------------------------" -ForegroundColor Cyan
 Write-Host "Done." -ForegroundColor Gray

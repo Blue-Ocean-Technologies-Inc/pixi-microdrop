@@ -92,7 +92,7 @@ if [ "$USE_SYSTEM_REDIS" = true ]; then
 fi
 
 echo -e "${MAGENTA}Starting Microdrop...${NC}"
-pixi run microdrop "${FORWARD_ARGS[@]}"
+pixi run microdrop_launch "${FORWARD_ARGS[@]}"
 
 echo -e "${CYAN}----------------------------------------${NC}"
 echo -e "${GRAY}Done.${NC}"
