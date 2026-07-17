@@ -107,6 +107,7 @@ setup-hooks = { cmd = "pixi exec --spec pre-commit -- pre-commit install --hook-
 opendrop-microdrop = { cmd = "python run_device_viewer_pluggable.py --device opendrop", cwd = "src/examples/" }
 opendrop-microdrop-backend = { cmd = "python run_device_viewer_pluggable_backend.py --device opendrop", cwd = "src/examples/" }
 opendrop-microdrop-frontend = { cmd = "python run_device_viewer_pluggable_frontend.py --device opendrop", cwd = "src/examples/" }
+microdrop_launch = { cmd = "python microdrop.py" }
 microdrop = { cmd = "python run_device_viewer_pluggable.py", cwd = "src/examples/" }
 microdrop-frontend = { cmd = "python run_device_viewer_pluggable_frontend.py", cwd = "src/examples/" }
 microdrop-backend = { cmd = "python run_device_viewer_pluggable_backend.py", cwd = "src/examples/" }
