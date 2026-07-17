@@ -432,10 +432,11 @@ def create_shortcut(cfg, name):
 class LogPane:
     """Thread-safe scrolled log: worker threads call it, the GUI polls."""
 
-    def __init__(self, parent):
+    def __init__(self, parent, height=18):
         import tkinter as tk
+        self._tcl_error = tk.TclError
         self.queue = queue.Queue()
-        self.text = tk.Text(parent, height=18, width=100, state="disabled")
+        self.text = tk.Text(parent, height=height, width=100, state="disabled")
         self.text.pack(fill="both", expand=True, padx=8, pady=8)
         self._poll()
 
@@ -452,6 +453,8 @@ class LogPane:
                 self.text.configure(state="disabled")
         except queue.Empty:
             pass
+        except self._tcl_error:
+            return  # widget destroyed (e.g. Back to configuration) — stop polling
         self.text.after(100, self._poll)
 
 
@@ -853,7 +856,15 @@ class LauncherWindow:
         for btn in self.ctx_buttons:
             btn.pack(anchor="w")
 
-        # Repositories (Git settings tab)
+        # Git settings tab
+        ttk.Label(
+            git_tab,
+            text="Note: if you have external plugins installed, changing the "
+                 "pixi-microdrop repo (branch switch, pull, or reset) may "
+                 "require reinstalling those plugins.",
+            foreground="#b00").pack(anchor="w", pady=(0, 6))
+
+        # Repositories
         repo_box = ttk.LabelFrame(git_tab, text="Repositories", padding=4)
         repo_box.pack(fill="x", anchor="n", pady=2)
         self.pixi_branch_var = tk.StringVar(value=cfg["pixi_repo_branch"])
@@ -880,6 +891,40 @@ class LauncherWindow:
             populate_branch_choices(branch_box, repo_dir, repo_url)
             ttk.Checkbutton(repo_box, text="update on launch",
                             variable=update_var).grid(row=row, column=3)
+
+        # Repository maintenance — discard/stash local changes per repo
+        maint_box = ttk.LabelFrame(git_tab, text="Repository maintenance",
+                                   padding=4)
+        maint_box.pack(fill="x", anchor="n", pady=2)
+        maint_repos = (("pixi-microdrop", install_dir),
+                       ("Microdrop source", install_dir / SRC_RELDIR))
+        for row, (label, repo_dir) in enumerate(maint_repos):
+            ttk.Label(maint_box, text=f"{label}:").grid(
+                row=row, column=0, sticky="w", padx=(0, 4))
+            ttk.Button(
+                maint_box, text="Reset (discard changes)",
+                command=lambda name=label, path=repo_dir: self._git_maintenance(
+                    name, path, ["reset", "--hard"],
+                    confirm=f"Discard ALL uncommitted changes in {name} "
+                            f"(git reset --hard)?\n\nThis cannot be undone.")
+            ).grid(row=row, column=1, padx=2, pady=1)
+            ttk.Button(
+                maint_box, text="Stash",
+                command=lambda name=label, path=repo_dir: self._git_maintenance(
+                    name, path, ["stash", "push", "--include-untracked"])
+            ).grid(row=row, column=2, padx=2, pady=1)
+            ttk.Button(
+                maint_box, text="Stash pop",
+                command=lambda name=label, path=repo_dir: self._git_maintenance(
+                    name, path, ["stash", "pop"])
+            ).grid(row=row, column=3, padx=2, pady=1)
+            ttk.Button(
+                maint_box, text="Pull",
+                command=lambda name=label, path=repo_dir: self._git_maintenance(
+                    name, path, ["pull"])
+            ).grid(row=row, column=4, padx=2, pady=1)
+        ttk.Label(git_tab, text="Git output:").pack(anchor="w", pady=(6, 0))
+        self.git_log = LogPane(git_tab, height=8)
 
         # Server Settings tab — written to src/redis_settings.json at launch
         self.redis_host_var = tk.StringVar(value=cfg["redis_host"])
@@ -1022,7 +1067,24 @@ class LauncherWindow:
                 self.worker_timeout_var, DEFAULT_CONFIG["worker_timeout"]))
         save_config(self.cfg)
 
+    def _git_maintenance(self, name, repo_dir, git_args, confirm=None):
+        """Run a maintenance git command against *repo_dir*, streaming to the
+        Git-tab output pane on a worker thread."""
+        if confirm and not self.messagebox.askyesno(
+                "Confirm", confirm, parent=self.root):
+            return
+        if not Path(repo_dir).is_dir():
+            self.git_log(f"[{name}] {repo_dir} not found — is it installed?")
+            return
+
+        def worker():
+            self.git_log(f"[{name}] git {' '.join(git_args)}")
+            run_streamed(["git", *git_args], self.git_log, cwd=repo_dir)
+
+        threading.Thread(target=worker, daemon=True).start()
+
     def _launch(self):
+        from tkinter import ttk
         self._save()
         if not self.cfg["plugins"]:
             self.messagebox.showerror(
@@ -1033,7 +1095,18 @@ class LauncherWindow:
         self.root.configure(menu="")
         self.frame.destroy()
         self.root.title("Microdrop — launching…")
-        log = LogPane(self.root)
+
+        launch_frame = ttk.Frame(self.root, padding=12)
+        launch_frame.pack(fill="both", expand=True)
+        ttk.Button(launch_frame, text="← Back to configuration",
+                   command=lambda: self._back_to_config(launch_frame)).pack(
+            anchor="w")
+        ttk.Label(
+            launch_frame,
+            text="Microdrop runs in a separate process; closing it or coming "
+                 "back here does not stop it.",
+            foreground="gray40").pack(anchor="w", pady=(2, 4))
+        log = LogPane(launch_frame)
 
         def worker():
             if not do_launch(self.cfg, log):
@@ -1043,6 +1116,10 @@ class LauncherWindow:
                     "to reinstall.")
 
         threading.Thread(target=worker, daemon=True).start()
+
+    def _back_to_config(self, launch_frame):
+        launch_frame.destroy()
+        LauncherWindow(self.root, self.cfg)
 
     def _create_shortcut(self):
         self._save()
