@@ -23,9 +23,9 @@ libc = { family = "glibc", version = "2.31" }
 microdrop_py = { path = ".", editable = true }
 #
 #[tool.pixi.feature.test.pypi-dependencies]
-heater_microdrop_plugin = { path = "src/heater-microdrop-plugin-py", editable = true }
-magnet_microdrop_plugin = { path = "src/magnet-microdrop-plugin-py", editable = true }
-fluorescence_microdrop_plugin = { path = "src/fluorescence-microdrop-plugin-py", editable = true }
+#heater_microdrop_plugin = { path = "src/heater-microdrop-plugin-py", editable = true }
+#magnet_microdrop_plugin = { path = "src/magnet-microdrop-plugin-py", editable = true }
+#fluorescence_microdrop_plugin = { path = "src/fluorescence-microdrop-plugin-py", editable = true }
 
 #[tool.pixi.environments]
 #test = ["test"]
