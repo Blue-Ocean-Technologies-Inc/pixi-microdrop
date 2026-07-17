@@ -15,6 +15,7 @@ import json
 import os
 import queue
 import shutil
+import stat
 import subprocess
 import sys
 import threading
@@ -22,11 +23,21 @@ import webbrowser
 from pathlib import Path
 
 IS_WINDOWS = os.name == "nt"
+# True when running as a PyInstaller-frozen executable instead of a .py.
+IS_FROZEN = getattr(sys, "frozen", False)
 PIXI_REPO_URL = "https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop.git"
 SRC_REPO_URL = "https://github.com/Blue-Ocean-Technologies-Inc/Microdrop.git"
 PIXI_MANUAL_INSTALL_URL = "https://pixi.prefix.dev/latest/installation/"
 REPO_DIR_NAME = "pixi-microdrop"
-SCRIPT_NAME = "microdrop_setup.py"
+if IS_FROZEN:
+    SCRIPT_NAME = "microdrop_setup.exe" if IS_WINDOWS else "microdrop_setup"
+else:
+    SCRIPT_NAME = "microdrop_setup.py"
+
+
+def this_script():
+    """Path of what is running: the frozen exe, or this .py file."""
+    return Path(sys.executable if IS_FROZEN else __file__).resolve()
 PIXI_PROJECT_RELDIR = "microdrop-py"
 SRC_RELDIR = Path("microdrop-py/src")
 PLUGIN_CONSTS_RELPATH = Path("microdrop-py/src/examples/plugin_consts.py")
@@ -84,6 +95,23 @@ def save_config(cfg):
     path = config_path()
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
+
+
+def _rmtree_force(func, path, _exc_info):
+    """shutil.rmtree onerror hook: clear read-only (git objects) and retry."""
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
+
+
+def delete_installation(install_dir, log):
+    """Remove an installation directory from disk. True on full removal."""
+    try:
+        shutil.rmtree(install_dir, onerror=_rmtree_force)
+    except OSError as exc:
+        log(f"Warning: could not fully delete {install_dir}: {exc}")
+        return False
+    log(f"Deleted {install_dir}.")
+    return True
 
 
 def _needs_preinstall(cfg):
@@ -280,13 +308,18 @@ def create_shortcut(cfg, name):
     install_dir = Path(cfg["install_dir"])
     script = install_dir / SCRIPT_NAME
     path = shortcut_path(name)
+    # Frozen exe runs itself; the .py needs the current interpreter.
+    if IS_FROZEN:
+        target, args = str(script), "--launch"
+    else:
+        target, args = sys.executable, f'"{script}" --launch'
     if IS_WINDOWS:
         icon = install_dir / ICON_RELPATH
         ps = (
             "$W = New-Object -ComObject WScript.Shell; "
             f"$S = $W.CreateShortcut('{path}'); "
-            f"$S.TargetPath = '{sys.executable}'; "
-            f"$S.Arguments = '\"{script}\" --launch'; "
+            f"$S.TargetPath = '{target}'; "
+            f"$S.Arguments = '{args}'; "
             f"$S.WorkingDirectory = '{install_dir}'; "
             f"$S.IconLocation = '{icon}'; "
             "$S.Save()"
@@ -303,7 +336,7 @@ def create_shortcut(cfg, name):
             "[Desktop Entry]\n"
             "Type=Application\n"
             f"Name={name}\n"
-            f'Exec={sys.executable} "{script}" --launch\n'
+            f"Exec={target} {args}\n"
             f"Icon={icon}\n"
             "Terminal=true\n",
             encoding="utf-8")
@@ -497,9 +530,11 @@ class PreInstallWizard:
                 return
 
             target = install_dir / SCRIPT_NAME
-            script = Path(__file__).resolve()
+            script = this_script()
             if target.resolve() != script:
                 shutil.copyfile(script, target)
+                if not IS_WINDOWS:
+                    target.chmod(0o755)
                 log(f"Copied setup script to {target}")
 
             self.cfg.update(
@@ -628,6 +663,8 @@ class LauncherWindow:
                    command=self._launch).pack(side="left", padx=4)
         ttk.Button(buttons_row, text="Create Desktop Shortcut",
                    command=self._create_shortcut).pack(side="left", padx=4)
+        ttk.Button(buttons_row, text="New Installation…",
+                   command=self._new_installation).pack(side="left", padx=4)
         ttk.Button(buttons_row, text="Save & Close",
                    command=self._save_close).pack(side="left", padx=4)
 
@@ -718,6 +755,42 @@ class LauncherWindow:
             f"Created {created}.\nIt always launches the last saved "
             "configuration; rerun this script to change it.",
             parent=self.root)
+
+    def _new_installation(self):
+        """Return to the pre-install wizard, optionally deleting this install."""
+        old_dir = Path(self.cfg["install_dir"])
+        delete = self.messagebox.askyesnocancel(
+            "New installation",
+            f"Set up a new installation?\n\n"
+            f"The current one is at:\n{old_dir}\n\n"
+            "Yes — delete it from disk first.\n"
+            "No — keep it and just set up another one.\n"
+            "Cancel — go back.",
+            parent=self.root)
+        if delete is None:
+            return
+        self._save()
+        self.cfg["preinstall_done"] = False
+        if delete:
+            self.cfg["install_dir"] = ""
+        save_config(self.cfg)
+
+        self.frame.destroy()
+        wizard = PreInstallWizard(
+            self.root, self.cfg,
+            on_done=lambda: LauncherWindow(self.root, self.cfg))
+        if delete:
+            # Delete in the background; hold Install until the old tree is
+            # gone so a reinstall into the same path can't race the removal.
+            wizard.install_btn.configure(state="disabled")
+            wizard.log(f"Deleting old installation at {old_dir}…")
+
+            def worker():
+                delete_installation(old_dir, wizard.log)
+                self.root.after(
+                    0, lambda: wizard.install_btn.configure(state="normal"))
+
+            threading.Thread(target=worker, daemon=True).start()
 
     def _save_close(self):
         self._save()
