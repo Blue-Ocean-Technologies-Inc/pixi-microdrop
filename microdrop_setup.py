@@ -23,6 +23,7 @@ from pathlib import Path
 
 IS_WINDOWS = os.name == "nt"
 PIXI_REPO_URL = "https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop.git"
+SRC_REPO_URL = "https://github.com/Blue-Ocean-Technologies-Inc/Microdrop.git"
 PIXI_MANUAL_INSTALL_URL = "https://pixi.prefix.dev/latest/installation/"
 REPO_DIR_NAME = "pixi-microdrop"
 SCRIPT_NAME = "microdrop_setup.py"
@@ -169,6 +170,28 @@ def parse_plugin_groups(consts_path):
 # Git + launch
 # --------------------------------------------------------------------------
 
+def list_remote_branches(url):
+    """Branch names available on the remote (git ls-remote --heads).
+
+    Queries the remote directly, so it works before anything is cloned.
+    Returns [] on failure (offline, bad URL) — callers keep their default.
+    """
+    code, out = run_capture(["git", "ls-remote", "--heads", url])
+    if code != 0:
+        return []
+    return sorted(line.split("refs/heads/", 1)[1].strip()
+                  for line in out.splitlines() if "refs/heads/" in line)
+
+
+def git_checkout(repo_dir, branch, log):
+    """Check out *branch*, fetching once if it only exists on the remote."""
+    if run_streamed(["git", "checkout", branch], log, cwd=repo_dir) == 0:
+        return True
+    # Branch may have been created on the remote after this clone was made.
+    run_streamed(["git", "fetch", "--prune"], log, cwd=repo_dir)
+    return run_streamed(["git", "checkout", branch], log, cwd=repo_dir) == 0
+
+
 def git_update_repo(repo_dir, branch, log):
     """Best-effort checkout of *branch* (resolves detached HEAD) then pull.
 
@@ -181,7 +204,7 @@ def git_update_repo(repo_dir, branch, log):
         return
     current = current.strip()
     if branch and current != branch:
-        if run_streamed(["git", "checkout", branch], log, cwd=repo_dir) != 0:
+        if not git_checkout(repo_dir, branch, log):
             log(f"Warning: could not check out '{branch}' in {repo_dir}; "
                 f"staying on '{current or 'detached HEAD'}'.")
     if run_streamed(["git", "pull"], log, cwd=repo_dir) != 0:
@@ -209,7 +232,7 @@ def do_launch(cfg, log=print):
         # the launch_microdrop.* scripts require it there.
         os.environ["PATH"] = (str(Path(pixi).parent) + os.pathsep
                               + os.environ.get("PATH", ""))
-        if run_streamed([pixi, "self-update"], log) != 0:
+        if run_streamed([pixi, "self-update"], log, cwd=install_dir) != 0:
             log("Warning: pixi self-update failed. "
                 "Continuing with the current version...")
     else:
@@ -226,7 +249,9 @@ def do_launch(cfg, log=print):
                "-File", str(install_dir / "launch_microdrop.ps1"), *run_args]
     else:
         cmd = ["bash", str(install_dir / "launch_microdrop.sh"), *run_args]
-    run_streamed(cmd, log)
+    # cwd from the saved appdata config — the shortcut/console this runs in
+    # may have any working directory.
+    run_streamed(cmd, log, cwd=install_dir)
     return True
 
 
@@ -290,6 +315,32 @@ def create_shortcut(cfg, name):
 # GUI (tkinter imports stay function-local so --launch works without Tk)
 # --------------------------------------------------------------------------
 
+def populate_branch_combos(root, combos):
+    """Fill branch dropdowns from the remotes without blocking the GUI.
+
+    *combos* is a list of ``(combobox, repo_url, repo_dir, string_var)``.
+    ``repo_dir`` may be None or not cloned yet; an existing checkout is
+    ``git fetch --prune``d first so newly listed branches are also locally
+    checkout-able. Until the background query finishes (or if it fails —
+    offline, bad URL), each dropdown keeps its current value.
+    """
+    def worker():
+        for combo, url, repo_dir, var in combos:
+            if repo_dir and (Path(repo_dir) / ".git").exists():
+                run_capture(["git", "fetch", "--prune"], cwd=repo_dir)
+            branches = list_remote_branches(url)
+
+            def apply(combo=combo, var=var, branches=branches):
+                if branches:
+                    combo.configure(values=branches)
+                    if var.get() not in branches:
+                        var.set(branches[0])
+
+            root.after(0, apply)
+
+    threading.Thread(target=worker, daemon=True).start()
+
+
 class LogPane:
     """Thread-safe scrolled log: worker threads call it, the GUI polls."""
 
@@ -344,12 +395,20 @@ class PreInstallWizard:
             row=0, column=2)
         ttk.Label(form, text="pixi-microdrop branch:").grid(
             row=1, column=0, sticky="w")
-        ttk.Entry(form, textvariable=self.pixi_branch_var).grid(
-            row=1, column=1, sticky="w", padx=4)
+        self.pixi_branch_combo = ttk.Combobox(
+            form, textvariable=self.pixi_branch_var, state="readonly",
+            values=[cfg["pixi_repo_branch"]])
+        self.pixi_branch_combo.grid(row=1, column=1, sticky="w", padx=4)
         ttk.Label(form, text="Microdrop source branch:").grid(
             row=2, column=0, sticky="w")
-        ttk.Entry(form, textvariable=self.src_branch_var).grid(
-            row=2, column=1, sticky="w", padx=4)
+        self.src_branch_combo = ttk.Combobox(
+            form, textvariable=self.src_branch_var, state="readonly",
+            values=[cfg["src_repo_branch"]])
+        self.src_branch_combo.grid(row=2, column=1, sticky="w", padx=4)
+        ttk.Button(form, text="Refresh branches",
+                   command=self._refresh_branches).grid(
+            row=1, column=2, rowspan=2, padx=4)
+        self._refresh_branches()
 
         self.install_btn = ttk.Button(
             self.frame, text="Install", command=self._start)
@@ -363,6 +422,14 @@ class PreInstallWizard:
             if chosen.name != REPO_DIR_NAME:
                 chosen = chosen / REPO_DIR_NAME
             self.dir_var.set(str(chosen))
+
+    def _refresh_branches(self):
+        install_dir = Path(self.dir_var.get()).expanduser()
+        populate_branch_combos(self.root, [
+            (self.pixi_branch_combo, PIXI_REPO_URL, install_dir,
+             self.pixi_branch_var),
+            (self.src_branch_combo, SRC_REPO_URL, install_dir / SRC_RELDIR,
+             self.src_branch_var)])
 
     def _start(self):
         if not find_git():
@@ -420,8 +487,7 @@ class PreInstallWizard:
             for repo_dir, branch in (
                     (install_dir, self.pixi_branch_var.get().strip()),
                     (install_dir / SRC_RELDIR, self.src_branch_var.get().strip())):
-                if branch and run_streamed(
-                        ["git", "checkout", branch], log, cwd=repo_dir) != 0:
+                if branch and not git_checkout(repo_dir, branch, log):
                     self._fail(f"Could not check out '{branch}' in {repo_dir}.")
                     return
 
@@ -535,15 +601,25 @@ class LauncherWindow:
         self.src_branch_var = tk.StringVar(value=cfg["src_repo_branch"])
         self.update_pixi_var = tk.BooleanVar(value=cfg["auto_update_pixi_repo"])
         self.update_src_var = tk.BooleanVar(value=cfg["auto_update_src_repo"])
-        rows = (("pixi-microdrop", self.pixi_branch_var, self.update_pixi_var),
-                ("Microdrop source", self.src_branch_var, self.update_src_var))
-        for row, (label, branch_var, update_var) in enumerate(rows):
+        install_dir = Path(cfg["install_dir"])
+        rows = (("pixi-microdrop", self.pixi_branch_var, self.update_pixi_var,
+                 PIXI_REPO_URL, install_dir),
+                ("Microdrop source", self.src_branch_var, self.update_src_var,
+                 SRC_REPO_URL, install_dir / SRC_RELDIR))
+        self.branch_combos = []
+        for row, (label, branch_var, update_var, url, repo_dir) in enumerate(rows):
             ttk.Label(repo_box, text=f"{label} branch:").grid(
                 row=row, column=0, sticky="w")
-            ttk.Entry(repo_box, textvariable=branch_var).grid(
-                row=row, column=1, padx=4)
+            combo = ttk.Combobox(repo_box, textvariable=branch_var,
+                                 state="readonly", values=[branch_var.get()])
+            combo.grid(row=row, column=1, padx=4)
             ttk.Checkbutton(repo_box, text="update on launch",
                             variable=update_var).grid(row=row, column=2)
+            self.branch_combos.append((combo, url, repo_dir, branch_var))
+        ttk.Button(repo_box, text="Refresh branches",
+                   command=self._refresh_branches).grid(
+            row=0, column=3, rowspan=2, padx=4)
+        self._refresh_branches()
 
         # Actions
         buttons_row = ttk.Frame(self.frame)
@@ -577,6 +653,9 @@ class LauncherWindow:
         state = "disabled" if self.ctx_auto_var.get() else "normal"
         for btn in self.ctx_buttons:
             btn.configure(state=state)
+
+    def _refresh_branches(self):
+        populate_branch_combos(self.root, self.branch_combos)
 
     def _save(self):
         plugins = []
