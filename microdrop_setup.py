@@ -137,6 +137,15 @@ def build_display_groups(parsed):
 # Config persistence
 # --------------------------------------------------------------------------
 
+# Machine-global keys never stored in a profile — always inherited from the
+# global config so profiles stay portable and survive a missing install.
+GLOBAL_ONLY_KEYS = ("install_dir", "preinstall_done")
+# Dropdown entry that represents the global working config (no named profile).
+DEFAULT_PROFILE_LABEL = "(default)"
+# Characters not allowed in a profile name (filesystem- and PS-command-unsafe).
+_INVALID_PROFILE_CHARS = '<>:"/\\|?*\''
+
+
 def config_path():
     if IS_WINDOWS:
         base = Path(os.environ.get("APPDATA", Path.home() / "AppData/Roaming"))
@@ -144,19 +153,62 @@ def config_path():
     return Path.home() / ".config" / "microdrop_launch" / "setup_config.json"
 
 
-def load_config():
-    cfg = dict(DEFAULT_CONFIG)
+def profiles_dir():
+    return config_path().parent / "profiles"
+
+
+def sanitize_profile_name(name):
+    """Filesystem- and shell-safe form of a profile name (may be empty)."""
+    return "".join(
+        "_" if ch in _INVALID_PROFILE_CHARS else ch for ch in name).strip()
+
+
+def profile_path(name):
+    return profiles_dir() / f"{sanitize_profile_name(name)}.json"
+
+
+def list_profiles():
     try:
-        cfg.update(json.loads(config_path().read_text(encoding="utf-8")))
-    except (OSError, ValueError):
-        pass  # missing/corrupt config -> fresh defaults (=> pre-install runs)
+        return sorted(path.stem for path in profiles_dir().glob("*.json"))
+    except OSError:
+        return []
+
+
+def load_config(profile=None):
+    """Load the global config, optionally overlaid with a named *profile*.
+
+    A missing/corrupt profile falls back to just the global config, so a
+    deleted profile still launches with sensible machine-global settings.
+    """
+    cfg = dict(DEFAULT_CONFIG)
+    for path in (config_path(), profile_path(profile) if profile else None):
+        if path is None:
+            continue
+        try:
+            cfg.update(json.loads(path.read_text(encoding="utf-8")))
+        except (OSError, ValueError):
+            pass  # missing/corrupt -> keep what we have (=> pre-install runs)
     return cfg
 
 
-def save_config(cfg):
-    path = config_path()
+def save_config(cfg, profile=None):
+    """Persist *cfg* to the global config, or to a named *profile* file
+    (profiles omit the machine-global keys)."""
+    if profile:
+        path = profile_path(profile)
+        data = {k: v for k, v in cfg.items() if k not in GLOBAL_ONLY_KEYS}
+    else:
+        path = config_path()
+        data = cfg
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
+    path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+
+def mark_preinstall_needed():
+    """Flag the global config so the next run re-runs pre-install."""
+    global_cfg = load_config()
+    global_cfg["preinstall_done"] = False
+    save_config(global_cfg)
 
 
 def _needs_preinstall(cfg):
@@ -389,18 +441,23 @@ def shortcut_path(name):
     return desktop_dir() / (f"{name}.lnk" if IS_WINDOWS else f"{name}.desktop")
 
 
-def create_shortcut(cfg, name):
-    """Create/overwrite the desktop shortcut; returns its path."""
+def create_shortcut(cfg, name, profile=None):
+    """Create/overwrite a desktop shortcut launching *profile*; return its path.
+
+    When *profile* is given the shortcut runs ``--launch --profile <profile>``
+    so each shortcut carries its own saved configuration.
+    """
     install_dir = Path(cfg["install_dir"])
     script = install_dir / SCRIPT_NAME
     path = shortcut_path(name)
+    profile_arg = f" --profile \"{profile}\"" if profile else ""
     if IS_WINDOWS:
         icon = install_dir / ICON_RELPATH
         ps = (
             "$W = New-Object -ComObject WScript.Shell; "
             f"$S = $W.CreateShortcut('{path}'); "
             f"$S.TargetPath = '{sys.executable}'; "
-            f"$S.Arguments = '\"{script}\" --launch'; "
+            f"$S.Arguments = '\"{script}\" --launch{profile_arg}'; "
             f"$S.WorkingDirectory = '{install_dir}'; "
             f"$S.IconLocation = '{icon}'; "
             "$S.Save()"
@@ -417,7 +474,7 @@ def create_shortcut(cfg, name):
             "[Desktop Entry]\n"
             "Type=Application\n"
             f"Name={name}\n"
-            f'Exec={sys.executable} "{script}" --launch\n'
+            f'Exec={sys.executable} "{script}" --launch{profile_arg}\n'
             f"Icon={icon}\n"
             "Terminal=true\n",
             encoding="utf-8")
@@ -724,10 +781,11 @@ class LauncherWindow:
     device; Options > Advanced mode unlocks every gated checkbox.
     """
 
-    def __init__(self, root, cfg):
+    def __init__(self, root, cfg, profile=None):
         import tkinter as tk
         from tkinter import messagebox, simpledialog, ttk
         self.root, self.cfg = root, cfg
+        self.profile = profile  # active profile name, or None for (default)
         self.messagebox, self.simpledialog = messagebox, simpledialog
 
         root.title("Microdrop Launcher")
@@ -765,6 +823,21 @@ class LauncherWindow:
                    command=self._create_shortcut).pack(side="left", padx=4)
         ttk.Button(buttons_row, text="Save & Close",
                    command=self._save_close).pack(side="left", padx=4)
+
+        # Profile bar — pick a saved config profile; each shortcut gets one.
+        profile_bar = ttk.Frame(self.frame)
+        profile_bar.pack(side="top", fill="x", pady=(0, 4))
+        ttk.Label(profile_bar, text="Profile:").pack(side="left")
+        self.profile_var = tk.StringVar(
+            value=self.profile or DEFAULT_PROFILE_LABEL)
+        self.profile_combo = ttk.Combobox(
+            profile_bar, textvariable=self.profile_var, state="readonly",
+            width=24, values=[DEFAULT_PROFILE_LABEL] + list_profiles())
+        self.profile_combo.pack(side="left", padx=4)
+        self.profile_combo.bind("<<ComboboxSelected>>", self._on_profile_selected)
+        self.shortcut_status_var = tk.StringVar()
+        ttk.Label(profile_bar, textvariable=self.shortcut_status_var,
+                  foreground="gray40").pack(side="left", padx=8)
 
         notebook = ttk.Notebook(self.frame)
         notebook.pack(fill="both", expand=True, pady=6)
@@ -968,6 +1041,37 @@ class LauncherWindow:
 
         self._apply_gating()
         self._apply_ctx_mode()
+        self._refresh_shortcut_status()
+
+    def _refresh_shortcut_status(self):
+        if self.profile is None:
+            self.shortcut_status_var.set(
+                "default config — create a shortcut to save it as a profile")
+        elif shortcut_path(self.profile).exists():
+            self.shortcut_status_var.set(
+                f"✓ desktop shortcut exists for '{self.profile}'")
+        else:
+            self.shortcut_status_var.set(
+                f"no desktop shortcut for '{self.profile}' yet")
+
+    def _refresh_profiles(self):
+        self.profile_combo["values"] = (
+            [DEFAULT_PROFILE_LABEL] + list_profiles())
+        self.profile_var.set(self.profile or DEFAULT_PROFILE_LABEL)
+        self._refresh_shortcut_status()
+
+    def _on_profile_selected(self, _event=None):
+        chosen = self.profile_var.get()
+        target = None if chosen == DEFAULT_PROFILE_LABEL else chosen
+        if target == self.profile:
+            return
+        self._save()  # persist current edits to their own target first
+        self._rebuild(load_config(target), target)
+
+    def _rebuild(self, cfg, profile):
+        self.root.configure(menu="")
+        self.frame.destroy()
+        LauncherWindow(self.root, cfg, profile=profile)
 
     def _add_server_setting(self, body, label_text, var, description,
                             int_only=False):
@@ -1065,7 +1169,7 @@ class LauncherWindow:
                 self.worker_threads_var, DEFAULT_CONFIG["worker_threads"]),
             worker_timeout=self._int_setting(
                 self.worker_timeout_var, DEFAULT_CONFIG["worker_timeout"]))
-        save_config(self.cfg)
+        save_config(self.cfg, self.profile)
 
     def _git_maintenance(self, name, repo_dir, git_args, confirm=None):
         """Run a maintenance git command against *repo_dir*, streaming to the
@@ -1110,8 +1214,7 @@ class LauncherWindow:
 
         def worker():
             if not do_launch(self.cfg, log):
-                self.cfg["preinstall_done"] = False
-                save_config(self.cfg)
+                mark_preinstall_needed()
                 log("Install directory missing — run this script again "
                     "to reinstall.")
 
@@ -1119,17 +1222,24 @@ class LauncherWindow:
 
     def _back_to_config(self, launch_frame):
         launch_frame.destroy()
-        LauncherWindow(self.root, self.cfg)
+        LauncherWindow(self.root, self.cfg, profile=self.profile)
 
     def _create_shortcut(self):
         self._save()
-        name = "Microdrop"
+        name = self.profile or "Microdrop"
         while True:
             name = self.simpledialog.askstring(
-                "Shortcut name", "Name for the desktop shortcut:",
+                "Shortcut & profile name",
+                "Name for this config profile and its desktop shortcut:",
                 initialvalue=name, parent=self.root)
             if not name:
                 return
+            name = sanitize_profile_name(name)
+            if not name:
+                self.messagebox.showerror(
+                    "Invalid name", "Please enter a valid profile name.",
+                    parent=self.root)
+                continue
             existing = shortcut_path(name)
             if existing.exists() and not self.messagebox.askyesno(
                     "Shortcut exists",
@@ -1138,16 +1248,21 @@ class LauncherWindow:
                     parent=self.root):
                 continue
             break
+        # Save the current configuration as this named profile, then point a
+        # shortcut at it so it launches with exactly this config.
+        self.profile = name
+        save_config(self.cfg, name)
         try:
-            created = create_shortcut(self.cfg, name)
+            created = create_shortcut(self.cfg, name, profile=name)
         except (OSError, subprocess.CalledProcessError) as exc:
             self.messagebox.showerror(
                 "Shortcut failed", str(exc), parent=self.root)
             return
+        self._refresh_profiles()
         self.messagebox.showinfo(
             "Shortcut created",
-            f"Created {created}.\nIt always launches the last saved "
-            "configuration; rerun this script to change it.",
+            f"Created {created}.\nIt launches the '{name}' profile. Edit this "
+            "profile here and recreate the shortcut to update it.",
             parent=self.root)
 
     def _save_close(self):
@@ -1155,12 +1270,12 @@ class LauncherWindow:
         self.root.destroy()
 
 
-def run_gui(cfg):
+def run_gui(cfg, profile=None):
     import tkinter as tk
     root = tk.Tk()
 
     def open_launcher():
-        LauncherWindow(root, cfg)
+        LauncherWindow(root, cfg, profile=profile)
 
     if _needs_preinstall(cfg):
         PreInstallWizard(root, cfg, on_done=open_launcher)
@@ -1176,9 +1291,13 @@ def main(argv=None):
         "--launch", action="store_true",
         help="Launch the saved configuration without the GUI (what desktop "
              "shortcuts run).")
+    parser.add_argument(
+        "--profile", metavar="NAME",
+        help="Named config profile to load (per-shortcut configs). Falls back "
+             "to the global config when the profile is missing.")
     args = parser.parse_args(argv)
 
-    cfg = load_config()
+    cfg = load_config(args.profile)
     if args.launch:
         if not _needs_preinstall(cfg):
             do_launch(cfg)
@@ -1188,9 +1307,8 @@ def main(argv=None):
                 pass
             return
         # Appdata/install dir went missing: pre-install must run again.
-        cfg["preinstall_done"] = False
-        save_config(cfg)
-    run_gui(cfg)
+        mark_preinstall_needed()
+    run_gui(cfg, profile=args.profile)
 
 
 if __name__ == "__main__":
