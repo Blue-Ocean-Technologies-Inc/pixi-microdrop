@@ -124,6 +124,12 @@ def microdrop(device="dropbot", plugin_names=None, context_names=None):
 
 
 if __name__ == "__main__":
+    # Required before anything spawns a process on Windows,
+    # and a no-op elsewhere.
+    import multiprocessing
+
+    multiprocessing.freeze_support()
+
     parser = argparse.ArgumentParser(
         description="Run Microdrop with a custom plugin/context selection.")
     parser.add_argument(
