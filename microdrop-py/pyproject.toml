@@ -3,7 +3,7 @@ name = "microdrop-py"
 version = "0.1.0"
 authors = [{name = "Vigne-hub", email = "vignesh.rajesh@outlook.com"}]
 requires-python = ">= 3.11"
-dependencies = ["pyside6<=6.9.2,<7", "dotenv>=0.9.9,<0.10", "opencv-python-headless>=5.0.0.93,<6"]
+dependencies = ["pyside6<=6.9.2,<7", "dotenv>=0.9.9,<0.10", "opencv-python-headless>=5.0.0.93,<6", "osam>=0.5.0,<0.6", "openai<3", "vosk>=0.3.44,<0.4", "sounddevice>=0.5.6,<0.6", "pyttsx3>=2.99,<3", "piper-tts>=1.7.0,<2", "claude-agent-sdk>=0.2.139,<0.3"]
 
 [build-system]
 build-backend = "hatchling.build"
@@ -90,11 +90,15 @@ black = ">=26.5.1,<27"
 mpremote = ">=1.25.0,<2"
 pytest-bdd = ">=8.1.0,<9"
 scipy = ">=1.18.0,<2"
+platformio = "==6.1.19"
 
 # --- TARGET: Windows (win-64) ---
 [tool.pixi.target.win-64.dependencies]
 ntfsutils = ">=0.1.5,<0.2"
 redis-server = ">=3.0.501,<4"
+
+[tool.pixi.target.win-64.pypi-dependencies]
+onnxruntime-directml = ">=1.24.4, <2"
 
 # --- TARGET: Linux (linux-aarch64) ---
 [tool.pixi.target.linux-aarch64.dependencies]
