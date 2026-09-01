@@ -38,13 +38,20 @@ jobs:
           set -o pipefail
           pixi update --json | pixi exec pixi-diff-to-markdown >> ../diff.md
 
+      # The org's release app mints a short-lived token for the PR: one
+      # opened by the built-in token triggers no workflows, so the commit
+      # check would never run on it.
+      - name: Mint the release-app token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
       - name: Create pull request
         uses: peter-evans/create-pull-request@v8
         with:
-          # A PR opened with the built-in token triggers no workflows, so
-          # the commit check would never run on it; the org release token
-          # opens it as a normal user PR.
-          token: ${{ secrets.RELEASE_PAT || github.token }}
+          token: ${{ steps.app-token.outputs.token }}
           commit-message: "chore(deps): update pixi lock file"
           title: "chore(deps): update pixi lock file"
           body-path: diff.md
