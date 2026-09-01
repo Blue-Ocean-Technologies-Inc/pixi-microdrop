@@ -1,0 +1,23 @@
+# Keeps the repo's own tooling current. The application environment
+# (pixi.lock) is out of Dependabot's reach -- see update-pixi-lock.yml.
+version: 2
+updates:
+  # Action majors in .github/workflows: an end-of-life major breaks the
+  # release job, so bump them, grouped into one PR a month at most.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(deps)"
+
+  # Hook revs in .pre-commit-config.yaml, the local mirror of the CI gates.
+  - package-ecosystem: pre-commit
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "chore(deps)"
