@@ -1,0 +1,51 @@
+name: Update pixi lock file
+
+# The Dependabot equivalent for the application environment: once a month
+# `pixi update` re-resolves microdrop-py/pixi.lock (conda + PyPI, all
+# platforms) and one PR carries the full diff of what moved, rendered by
+# pixi-diff-to-markdown. Nothing else in the repo changes. The chore(deps)
+# message passes the commit check without triggering a release.
+#
+# Needs "Allow GitHub Actions to create and approve pull requests" enabled
+# under Settings -> Actions -> General.
+
+permissions:
+  contents: write
+  pull-requests: write
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 5 1 * *"   # 05:00 UTC on the 1st of the month
+
+jobs:
+  pixi-update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true   # microdrop_py is an editable path dependency
+
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@v0.8.3
+        with:
+          manifest-path: microdrop-py/pyproject.toml
+          run-install: false
+
+      - name: Update lock file
+        working-directory: microdrop-py
+        run: |
+          set -o pipefail
+          pixi update --json | pixi exec pixi-diff-to-markdown >> ../diff.md
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(deps): update pixi lock file"
+          title: "chore(deps): update pixi lock file"
+          body-path: diff.md
+          branch: update-pixi
+          base: master
+          delete-branch: true
+          add-paths: microdrop-py/pixi.lock
