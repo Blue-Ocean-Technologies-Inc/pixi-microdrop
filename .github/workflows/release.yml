@@ -51,7 +51,10 @@ jobs:
             exit "$rc"
           fi
           tag="$(git describe --tags --abbrev=0)"
-          git push origin master "refs/tags/$tag"
+          # Atomic: a mid-run merge that makes master non-fast-forward must not
+          # leave the tag behind, or every later run sees an orphan tag and
+          # tries to re-create it (exit 7).
+          git push --atomic origin master "refs/tags/$tag"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
       - name: Publish GitHub Release
