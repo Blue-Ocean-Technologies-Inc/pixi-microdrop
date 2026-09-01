@@ -28,9 +28,6 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0   # cz bump walks the full history and tags
-          # The org release token, so the bump push and the release carry
-          # the same identity as the other repos' pipelines.
-          token: ${{ secrets.RELEASE_PAT || github.token }}
 
       - name: Install commitizen
         run: pipx install "commitizen>=4,<5"
@@ -63,7 +60,7 @@ jobs:
       - name: Publish GitHub Release
         if: steps.bump.outputs.tag != ''
         env:
-          GH_TOKEN: ${{ secrets.RELEASE_PAT || github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "${{ steps.bump.outputs.tag }}" \
             --title "${{ steps.bump.outputs.tag }}" \
