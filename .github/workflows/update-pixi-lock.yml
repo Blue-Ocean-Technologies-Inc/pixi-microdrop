@@ -41,7 +41,10 @@ jobs:
       - name: Create pull request
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # A PR opened with the built-in token triggers no workflows, so
+          # the commit check would never run on it; the org release token
+          # opens it as a normal user PR.
+          token: ${{ secrets.RELEASE_PAT || github.token }}
           commit-message: "chore(deps): update pixi lock file"
           title: "chore(deps): update pixi lock file"
           body-path: diff.md
