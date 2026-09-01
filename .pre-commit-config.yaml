@@ -3,7 +3,7 @@
 # staged-file sanity checks.
 repos:
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.16.4
+    rev: v4.18.0
     hooks:
       - id: commitizen        # commit-msg: enforce Conventional Commits
   - repo: https://github.com/pre-commit/pre-commit-hooks
