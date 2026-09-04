@@ -32,3 +32,7 @@ commit-message hook here as well as in the source and plugin clones.
 Never commit firmware images (`firmware_*.zip`, `.hex`, `.uf2`), experiment
 capture data, or scratch notes to this repo — firmware ships with the boards.
 `.gitignore` enforces this; do not add exceptions.
+
+Pre-commit runs ruff, the copyright-header inserter, and the shared
+`microdrop-dev-hooks` hooks on the launcher's own Python files; the
+submodule and plugin clones have their own configs.

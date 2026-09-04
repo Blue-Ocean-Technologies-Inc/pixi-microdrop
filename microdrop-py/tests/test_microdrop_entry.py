@@ -1,6 +1,16 @@
-import pytest
+# (C) Copyright 2024-2026 Blue Ocean Technologies, Inc., Toronto, ON
+# All rights reserved.
+#
+# This software is provided without warranty under the terms of the AGPL-3.0
+# license included in LICENSE and may be redistributed only under the
+# conditions described in the aforementioned license. The license is also
+# available online at https://www.gnu.org/licenses/agpl-3.0.txt
+#
+# Thanks for using Microdrop open source!
 
+# Third-party imports.
 import microdrop as entry
+import pytest
 from examples.plugin_consts import (
     BACKEND_APPLICATION,
     BACKEND_PLUGINS,
@@ -17,9 +27,16 @@ from examples.plugin_consts import (
 
 def test_default_matches_full_dropbot_set():
     cfg = entry.resolve_run_config()
-    expected = list(dict.fromkeys(
-        REQUIRED_PLUGINS + FRONTEND_PLUGINS + DROPBOT_FRONTEND_PLUGINS
-        + SERVICE_PLUGINS + BACKEND_PLUGINS + DROPBOT_BACKEND_PLUGINS))
+    expected = list(
+        dict.fromkeys(
+            REQUIRED_PLUGINS
+            + FRONTEND_PLUGINS
+            + DROPBOT_FRONTEND_PLUGINS
+            + SERVICE_PLUGINS
+            + BACKEND_PLUGINS
+            + DROPBOT_BACKEND_PLUGINS
+        )
+    )
     assert cfg["plugins"] == expected
     assert cfg["application"] is FRONTEND_APPLICATION
     assert cfg["persist"] is False
@@ -28,17 +45,22 @@ def test_default_matches_full_dropbot_set():
 
 def test_selection_is_reordered_to_consts_order():
     # Passed backend-first on purpose; load order must follow plugin_consts.
-    cfg = entry.resolve_run_config(plugin_names=[
-        "DropbotControllerPlugin", "DeviceViewerPlugin", "TasksPlugin"])
+    cfg = entry.resolve_run_config(
+        plugin_names=["DropbotControllerPlugin", "DeviceViewerPlugin", "TasksPlugin"]
+    )
     optional = [p for p in cfg["plugins"] if p not in REQUIRED_PLUGINS]
     assert [p.__name__ for p in optional] == [
-        "TasksPlugin", "DeviceViewerPlugin", "DropbotControllerPlugin"]
-    assert cfg["plugins"][:len(REQUIRED_PLUGINS)] == REQUIRED_PLUGINS
+        "TasksPlugin",
+        "DeviceViewerPlugin",
+        "DropbotControllerPlugin",
+    ]
+    assert cfg["plugins"][: len(REQUIRED_PLUGINS)] == REQUIRED_PLUGINS
 
 
 def test_backend_only_selection_runs_headless():
-    cfg = entry.resolve_run_config(plugin_names=[
-        "ElectrodeControllerPlugin", "DropbotControllerPlugin"])
+    cfg = entry.resolve_run_config(
+        plugin_names=["ElectrodeControllerPlugin", "DropbotControllerPlugin"]
+    )
     assert cfg["application"] is BACKEND_APPLICATION
     assert cfg["persist"] is True
     assert cfg["contexts"] == REQUIRED_CONTEXT

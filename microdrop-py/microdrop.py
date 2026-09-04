@@ -1,3 +1,13 @@
+# (C) Copyright 2024-2026 Blue Ocean Technologies, Inc., Toronto, ON
+# All rights reserved.
+#
+# This software is provided without warranty under the terms of the AGPL-3.0
+# license included in LICENSE and may be redistributed only under the
+# conditions described in the aforementioned license. The license is also
+# available online at https://www.gnu.org/licenses/agpl-3.0.txt
+#
+# Thanks for using Microdrop open source!
+
 """Parameterized Microdrop entry point.
 
 Run from ``microdrop-py/`` (the pixi ``microdrop`` task does this)::
@@ -8,8 +18,11 @@ Run from ``microdrop-py/`` (the pixi ``microdrop`` task does this)::
 
 With no arguments this launches the full dropbot frontend + backend set.
 """
+
+# Standard library imports.
 import argparse
 
+# Third-party imports.
 from examples.plugin_consts import (
     BACKEND_APPLICATION,
     BACKEND_PLUGINS,
@@ -48,9 +61,13 @@ _ORDERED_OPTIONAL_GROUPS = (
 
 _FRONTEND_PLUGIN_SET = frozenset(
     plugin
-    for group in (FRONTEND_PLUGINS, DROPBOT_FRONTEND_PLUGINS,
-                  PORTABLE_DROPBOT_FRONTEND_PLUGINS,
-                  OPENDROP_FRONTEND_PLUGINS, MOCK_DROPBOT_FRONTEND_PLUGINS)
+    for group in (
+        FRONTEND_PLUGINS,
+        DROPBOT_FRONTEND_PLUGINS,
+        PORTABLE_DROPBOT_FRONTEND_PLUGINS,
+        OPENDROP_FRONTEND_PLUGINS,
+        MOCK_DROPBOT_FRONTEND_PLUGINS,
+    )
     for plugin in group
 )
 
@@ -81,9 +98,12 @@ _DEVICE_BACKEND_GROUPS = {
 
 
 def _default_plugin_names(device):
-    groups = ([FRONTEND_PLUGINS] + _DEVICE_FRONTEND_GROUPS[device]
-              + [SERVICE_PLUGINS, BACKEND_PLUGINS]
-              + _DEVICE_BACKEND_GROUPS[device])
+    groups = (
+        [FRONTEND_PLUGINS]
+        + _DEVICE_FRONTEND_GROUPS[device]
+        + [SERVICE_PLUGINS, BACKEND_PLUGINS]
+        + _DEVICE_BACKEND_GROUPS[device]
+    )
     return [plugin.__name__ for group in groups for plugin in group]
 
 
@@ -98,30 +118,39 @@ def resolve_run_config(device="dropbot", plugin_names=None, context_names=None):
         plugin_names = _default_plugin_names(device)
     unknown = sorted(set(plugin_names) - OPTIONAL_PLUGINS.keys())
     if unknown:
-        raise ValueError(f"Unknown plugins: {', '.join(unknown)}. "
-                         f"Valid names: {', '.join(OPTIONAL_PLUGINS)}")
+        raise ValueError(
+            f"Unknown plugins: {', '.join(unknown)}. "
+            f"Valid names: {', '.join(OPTIONAL_PLUGINS)}"
+        )
     selected = set(plugin_names)
-    optional = [plugin for name, plugin in OPTIONAL_PLUGINS.items()
-                if name in selected]
+    optional = [plugin for name, plugin in OPTIONAL_PLUGINS.items() if name in selected]
     has_frontend = any(plugin in _FRONTEND_PLUGIN_SET for plugin in optional)
 
     if not context_names:
-        contexts = (SERVER_CONTEXT + REQUIRED_CONTEXT if has_frontend
-                    else list(REQUIRED_CONTEXT))
+        contexts = (
+            SERVER_CONTEXT + REQUIRED_CONTEXT
+            if has_frontend
+            else list(REQUIRED_CONTEXT)
+        )
     else:
         unknown = sorted(set(context_names) - CONTEXTS.keys())
         if unknown:
-            raise ValueError(f"Unknown contexts: {', '.join(unknown)}. "
-                             f"Valid names: {', '.join(CONTEXTS)}")
+            raise ValueError(
+                f"Unknown contexts: {', '.join(unknown)}. "
+                f"Valid names: {', '.join(CONTEXTS)}"
+            )
         selected_contexts = set(context_names)
-        contexts = [ctx for name, group in CONTEXTS.items()
-                    if name in selected_contexts for ctx in group]
+        contexts = [
+            ctx
+            for name, group in CONTEXTS.items()
+            if name in selected_contexts
+            for ctx in group
+        ]
 
     return {
         "plugins": list(dict.fromkeys(REQUIRED_PLUGINS + optional)),
         "contexts": contexts,
-        "application": FRONTEND_APPLICATION if has_frontend
-        else BACKEND_APPLICATION,
+        "application": FRONTEND_APPLICATION if has_frontend else BACKEND_APPLICATION,
         "persist": not has_frontend,
     }
 
@@ -132,18 +161,27 @@ def microdrop(device="dropbot", plugin_names=None, context_names=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Run Microdrop with a custom plugin/context selection.")
+        description="Run Microdrop with a custom plugin/context selection."
+    )
     parser.add_argument(
-        "--device", choices=["dropbot", "portable", "opendrop", "mock"], default="dropbot",
-        help="Device whose default plugin set is used when --plugins is "
-             "omitted.")
+        "--device",
+        choices=["dropbot", "portable", "opendrop", "mock"],
+        default="dropbot",
+        help="Device whose default plugin set is used when --plugins is omitted.",
+    )
     parser.add_argument(
-        "--plugins", nargs="+", metavar="PLUGIN",
+        "--plugins",
+        nargs="+",
+        metavar="PLUGIN",
         choices=sorted(OPTIONAL_PLUGINS),
         help="Optional plugin class names to load (required plugins are "
-             "always loaded).")
+        "always loaded).",
+    )
     parser.add_argument(
-        "--contexts", nargs="+", choices=sorted(CONTEXTS),
-        help="Contexts to start (default: inferred from the selection).")
+        "--contexts",
+        nargs="+",
+        choices=sorted(CONTEXTS),
+        help="Contexts to start (default: inferred from the selection).",
+    )
     args = parser.parse_args()
     microdrop(args.device, args.plugins, args.contexts)
