@@ -9,8 +9,10 @@
 # Thanks for using Microdrop open source!
 
 # Third-party imports.
-import microdrop as entry
 import pytest
+
+# Microdrop package imports.
+import microdrop as entry
 from examples.plugin_consts import (
     BACKEND_APPLICATION,
     BACKEND_PLUGINS,

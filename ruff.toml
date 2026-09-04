@@ -25,6 +25,10 @@ min-file-size = 1
 # AGENTS.md import order: standard -> third-party -> enthought -> other
 # microdrop packages (first-party) -> microdrop_style -> microdrop_utils
 # -> local relative -> logger last.
+# `examples` (submodule packages) and `microdrop` (the launcher's own
+# module) aren't directories at this root, so ruff can't infer they're
+# first-party from the filesystem the way it does inside the submodule.
+known-first-party = ["examples", "microdrop"]
 section-order = [
     "future",
     "standard-library",

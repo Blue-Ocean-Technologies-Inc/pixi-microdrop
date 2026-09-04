@@ -22,7 +22,7 @@ With no arguments this launches the full dropbot frontend + backend set.
 # Standard library imports.
 import argparse
 
-# Third-party imports.
+# Microdrop package imports.
 from examples.plugin_consts import (
     BACKEND_APPLICATION,
     BACKEND_PLUGINS,
