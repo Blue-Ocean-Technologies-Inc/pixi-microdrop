@@ -1,13 +1,30 @@
 # Install once per clone (from microdrop-py/): `pixi run setup-hooks`.
-# Local mirror of the CI gates: commit-message format (commitizen) and the
-# staged-file sanity checks.
+exclude: ^microdrop-py/(src|[a-z]+-microdrop-plugin-py)/
 repos:
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v4.18.0
     hooks:
-      - id: commitizen        # commit-msg: enforce Conventional Commits
+      - id: commitizen
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
+      - id: check-ast
       - id: check-merge-conflict
       - id: check-added-large-files
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.4
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.5
+    hooks:
+      - id: insert-license
+        files: \.py$
+        args: [--license-filepath, .copyright-header.txt, --comment-style, "#"]
+  - repo: https://github.com/Blue-Ocean-Technologies-Inc/microdrop-dev-hooks
+    rev: v0.1.0
+    hooks:
+      - id: stamp-import-sections
+      - id: forbid-scratch-files
