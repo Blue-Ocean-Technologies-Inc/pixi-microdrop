@@ -92,14 +92,15 @@ magnet-microdrop-plugin = ">=1.2.0,<2"
 
 # Conda run-dependencies declared by the plugin repos' own manifests
 # (fluorescence: mpremote, scipy; heater: mpremote). The plugins are run and
-# tested from this workspace with their clones on sys.path, so their runtime
-# dependencies have to be present here in both environments.
+# tested from this workspace's `test` environment with their clones on
+# sys.path, so their runtime dependencies have to be present there. The
+# default environment gets them from the installed plugin packages.
 [tool.pixi.feature.plugin-deps.dependencies]
 mpremote = ">=1.20"
 scipy = ">=1.18,<2"
 
 [tool.pixi.environments]
-default = { features = ["plugins", "plugin-deps"], solve-group = "default" }
+default = { features = ["plugins"], solve-group = "default" }
 test = { features = ["plugin-deps"], solve-group = "default" }
 
 # --- TARGET: Windows (win-64) ---

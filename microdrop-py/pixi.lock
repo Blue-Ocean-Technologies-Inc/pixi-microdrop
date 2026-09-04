@@ -49,7 +49,6 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
-      - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mr-box-peripheral-board-0.31.9-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/mr-box-peripheral-board-dev-0.31.9-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/nadamq-0.20.10.post1-py_0.conda
@@ -271,7 +270,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/ruamel.yaml.clib-0.2.15-py312h1b36aeb_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/ruff-0.16.6-hbcb56a7_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/s2n-1.7.6-h7e3ee7f_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/scipy-1.18.0-py312h54fa4ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/scons-4.11.1-py312h7900ff3_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/sdl2-2.32.56-h54a6638_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/sdl2_image-2.8.2-h06ee604_1.conda
@@ -492,7 +490,6 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
-      - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mr-box-peripheral-board-0.31.9-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/mr-box-peripheral-board-dev-0.31.9-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/nadamq-0.20.10.post1-py_0.conda
@@ -844,7 +841,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/ruamel.yaml.clib-0.2.15-py313h2f871a8_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/ruff-0.16.5-h4e39fff_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/s2n-1.7.6-h1b28cb6_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/scipy-1.18.0-py313h52f5312_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/scons-4.11.1-py313h8f79df9_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/sdl2-2.32.56-h784d473_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/sdl2_image-2.8.2-h376e2e1_1.conda
@@ -897,7 +893,6 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
-      - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mr-box-peripheral-board-0.31.9-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/mr-box-peripheral-board-dev-0.31.9-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/nadamq-0.20.10.post1-py_0.conda
@@ -1109,7 +1104,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/ruamel.yaml.clib-0.2.15-py312hd41f8a7_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/ruff-0.16.5-heed5028_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/s2n-1.7.6-h61cb6f2_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/scipy-1.18.0-py312ha7f05e0_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/scons-4.11.1-py312h996f985_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/sdl2-2.32.56-h7ac5ae9_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/sdl2_image-2.8.2-hd95cb85_1.conda
@@ -1328,7 +1322,6 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
-      - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mr-box-peripheral-board-0.31.9-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/mr-box-peripheral-board-dev-0.31.9-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/nadamq-0.20.10.post1-py_0.conda
@@ -1640,7 +1633,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/re2-2025.06.26-h3dd2b4f_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/ruamel.yaml.clib-0.2.15-py313h5fd188c_3.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/ruff-0.16.5-h6bcfbb0_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/scipy-1.18.0-py313he51e9a2_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/scons-4.11.1-py313hfa70ccb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/sdl2-2.32.56-h5112557_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/sdl2_image-2.8.12-h68aa3b2_0.conda
