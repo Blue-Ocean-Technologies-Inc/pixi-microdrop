@@ -16,6 +16,7 @@ channels = ["conda-forge", "alexsk", "vignesh229", "https://prefix.dev/microdrop
 # does not force a re-resolve. Windows and macOS take pixi defaults.
 platforms = [
     { name = "p1", platform = "linux-aarch64", glibc = "2.31" },
+    "linux-64",   # x86_64 CI runners (ubuntu-latest); the Pi is linux-aarch64
     "win-64",
     "osx-arm64",
 ]
@@ -100,6 +101,9 @@ redis-server = ">=3.0.501,<4"
 
 # --- TARGET: Linux (linux-aarch64) ---
 [tool.pixi.target.linux-aarch64.dependencies]
+redis-server = ">=8.10.1,<9"
+
+[tool.pixi.target.linux-64.dependencies]
 redis-server = ">=8.10.1,<9"
 
 [tool.pixi.target.osx-arm64.dependencies]
