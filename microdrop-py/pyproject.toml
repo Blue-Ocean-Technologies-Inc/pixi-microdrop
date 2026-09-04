@@ -90,9 +90,17 @@ import-linter = "==2.14"
 [tool.pixi.feature.plugins.dependencies]
 magnet-microdrop-plugin = ">=1.2.0,<2"
 
+# Conda run-dependencies declared by the plugin repos' own manifests
+# (fluorescence: mpremote, scipy; heater: mpremote). The plugins are run and
+# tested from this workspace with their clones on sys.path, so their runtime
+# dependencies have to be present here in both environments.
+[tool.pixi.feature.plugin-deps.dependencies]
+mpremote = ">=1.20"
+scipy = ">=1.18,<2"
+
 [tool.pixi.environments]
-default = { features = ["plugins"], solve-group = "default" }
-test = { features = [], solve-group = "default" }
+default = { features = ["plugins", "plugin-deps"], solve-group = "default" }
+test = { features = ["plugin-deps"], solve-group = "default" }
 
 # --- TARGET: Windows (win-64) ---
 [tool.pixi.target.win-64.dependencies]
