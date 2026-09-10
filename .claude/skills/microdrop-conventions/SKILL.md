@@ -12,6 +12,20 @@ user-invocable: false
 > checklist to retrofit later. The user runs periodic directive sweeps over
 > PRs; code that already follows them passes.
 
+## Whitespace Inside Function Bodies (strong maintainer preference)
+Function bodies are aired out so their shape reads at a glance. A body with no
+blank lines is a defect even when ruff passes. Apply while writing, never as a
+later pass:
+- Blank line BEFORE every `if` / `for` / `while` / `try` / `with` that follows
+  other statements at the same level, and AFTER the block ends before the next
+  outer-level statement.
+- Blank line between the setup chunk (assignments, unpacking) and the work that
+  uses it, and before the final `return`.
+- Inside a long block, one blank line between sub-steps; a comment introducing
+  a step stays glued to that step, the gap goes above the comment.
+- A guard clause after the docstring is its own chunk (blank line after it).
+- Only two- or three-line bodies are exempt.
+
 ## Service Patterns
 - Services implement `@provides(IServiceInterface)` decorator from Envisage
 - Service interfaces defined in `interfaces/i_*.py` using `traits.api.Interface`
