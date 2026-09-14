@@ -1,8 +1,6 @@
 # Microdrop Project
 
-The full project instructions live in [src/docs/CLAUDE.md](src/docs/CLAUDE.md)
-(consolidated in the Microdrop submodule's `docs/` so both repos share one docs
-folder). They are imported below so Claude Code still auto-loads them from the
-repo root.
+The full project instructions live in `src/AGENTS.md` (the Microdrop
+submodule), imported below so Claude Code auto-loads them from here too.
 
-@src/docs/CLAUDE.md
+@src/AGENTS.md

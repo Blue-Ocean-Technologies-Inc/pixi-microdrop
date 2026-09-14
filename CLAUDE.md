@@ -13,10 +13,10 @@ and the canonical memory store are resolved from.
 - `microdrop-py/fluorescence-microdrop-plugin-py/` — the fluorescence plugin, its
   own git repo, deliberately untracked here (same as the heater and magnet plugins).
 
-The full project instructions live in the submodule's docs folder so both this
+The full project instructions live in the submodule's `AGENTS.md` so both this
 repo and the standalone Microdrop clone share one copy:
 
-@microdrop-py/src/docs/CLAUDE.md
+@microdrop-py/src/AGENTS.md
 
 ## Releases
 
