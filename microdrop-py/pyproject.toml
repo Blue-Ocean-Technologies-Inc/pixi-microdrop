@@ -3,7 +3,7 @@ name = "microdrop-py"
 version = "0.1.0"
 authors = [{name = "Vigne-hub", email = "vignesh.rajesh@outlook.com"}]
 requires-python = ">= 3.11"
-dependencies = ["pyside6<=6.9.2,<7", "dotenv>=0.9.9,<0.10", "opencv-python-headless>=5.0.0.93,<6"]
+dependencies = ["pyside6>=6.8.0.2,<7", "dotenv>=0.9.9,<0.10", "opencv-python-headless>=5.0.0.93,<6"]
 
 [build-system]
 build-backend = "hatchling.build"
@@ -15,7 +15,7 @@ channels = ["conda-forge", "alexsk", "vignesh229", "https://prefix.dev/microdrop
 # is deprecated). The linux entry is named `p1` to match pixi.lock, so this
 # does not force a re-resolve. Windows and macOS take pixi defaults.
 platforms = [
-    { name = "p1", platform = "linux-aarch64", glibc = "2.31" },
+    { name = "p1", platform = "linux-aarch64", glibc = "2.41" },
     "linux-64",   # x86_64 CI runners (ubuntu-latest); the Pi is linux-aarch64
     "win-64",
     "osx-arm64",
@@ -23,6 +23,10 @@ platforms = [
 
 [tool.pixi.pypi-dependencies]
 microdrop_py = { path = ".", editable = true }
+# Windows: PyPI PySide6 >= 6.10 needs the system icuuc.dll, but conda-forge's
+# icu puts a same-named, incompatible one first on the DLL search path. This
+# installs a .pth that preloads the system copy at interpreter startup.
+pyside6-icu-preload = { path = "../pyside6-icu-preload" }
 
 # Ship every package under src/ automatically (`sources` strips the src/
 # prefix, so src/foo installs as foo). New packages are picked up without
@@ -82,6 +86,7 @@ pandas = ">=3.0.5,<4"
 ruff = ">=0.16.4,<0.17"
 mr-box-peripheral-board = ">=0.31.9,<0.32"
 import-linter = "==2.14"
+dropbot-portable-ui = ">=1.0.0,<2"
 
 # Released plugin packages from the microdrop-plugins channel. They live in
 # a feature so the `test` environment can omit them: plugin repos are tested
