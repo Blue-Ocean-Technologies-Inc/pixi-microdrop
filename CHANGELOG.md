@@ -1,3 +1,14 @@
+## [v0.2.0](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.2.0) (2026-09-15)
+
+### Feat
+
+- **pixi**: add dropbot-portable-ui, target glibc 2.41 ([`7a52abe`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/7a52abe5a2f7b9cc18718cee2f78b16d2c1b39de))
+
+### Fix
+
+- **pixi**: allow PySide6 6.11 and preload system ICU ([`d3c5d78`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/d3c5d78af9dd8c78fe5410c81627445e1015a76c))
+- add pyside6-icu-preload startup package ([`20187d9`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/20187d9d8ce0b1fd2bcfbfddff91f167b3a81c0c))
+
 ## [v0.1.0](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.1.0) (2026-09-01)
 
 ### Feat
