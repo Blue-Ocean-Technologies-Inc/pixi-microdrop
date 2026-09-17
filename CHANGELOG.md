@@ -1,3 +1,21 @@
+## [v0.3.0](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.3.0) (2026-09-17)
+
+### Feat
+
+- **pixi**: add share-prod-all for both hand-off zips ([`2d8da61`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/2d8da6176384107c8b5913ef6c61f3c25332b24c))
+- generate the offline hand-off with share-prod ([`1713319`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/1713319fe96e9f08ae23de294e6f4c2280dab739))
+- strip the build toolchain from prod packs ([`2b947dc`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/2b947dcce5e0e0129dcc2fe557a5ec3cd6792dee))
+- **pixi**: add prod environments and pack tasks ([`c1efc06`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/c1efc06eb03b1a9ed04d89283db46f99aa21fe74))
+
+### Fix
+
+- refuse a hand-off built from uncommitted src ([`ce9bdd9`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/ce9bdd9aa37bf85ef93c0fa813182d90224be16e))
+
+### Refactor
+
+- move the pack scripts into microdrop-py/tools ([`a913d78`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/a913d78b8cbe25b0dd7d093da4419f3fe3f28333))
+- **pixi**: keep clone-run plugins out of dev envs ([`3492801`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/3492801c6ea11c2a6a7131abdfd0e4a3540f6de4))
+
 ## [v0.2.0](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.2.0) (2026-09-15)
 
 ### Feat
