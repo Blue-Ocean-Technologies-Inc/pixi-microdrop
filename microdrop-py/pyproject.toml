@@ -201,6 +201,12 @@ pack-prod = { cmd = "pixi exec pixi-pack --environment {{ environment }} --platf
 # Usage: `pixi run pack-prod-slim win-64` -> dist/microdrop-prod-slim-win-64.tar
 #        `pixi run pack-prod-slim win-64 prod-no-ai` for the build without AI
 pack-prod-slim = { cmd = "python prune_pack.py dist/microdrop-{{ environment }}-{{ platform }}.tar dist/microdrop-{{ environment }}-slim-{{ platform }}.tar", args = ["platform", { arg = "environment", default = "prod" }], depends-on = [{ task = "pack-prod", args = ["{{ platform }}", "{{ environment }}"] }] }
+# The offline hand-off for a user without git: slim pack + pixi-unpack.exe +
+# the install/run scripts from share/ (+ the default AI model weights when the
+# pack carries the AI stack), as a folder and a zip — see build_share.py.
+# Usage: `pixi run share-prod win-64`            -> dist/share-microdrop-<version>-win-64-AI-support.zip
+#        `pixi run share-prod win-64 prod-no-ai` -> dist/share-microdrop-<version>-win-64-no-AI.zip
+share-prod = { cmd = "python build_share.py {{ platform }} {{ environment }}", args = ["platform", { arg = "environment", default = "prod" }], depends-on = [{ task = "pack-prod-slim", args = ["{{ platform }}", "{{ environment }}"] }] }
 # Same pack as a self-extracting script, so the user needs no pixi-unpack
 # binary. Linux/macOS only (.sh): the win-64 .ps1 embeds the ~1.2 GB archive
 # as base64 text and PowerShell fails to load it ("An error occurred while
