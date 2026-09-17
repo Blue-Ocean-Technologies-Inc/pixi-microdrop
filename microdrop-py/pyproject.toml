@@ -97,7 +97,6 @@ pygame = ">=2.6.1,<3"
 paramiko = ">=5.0.0,<6"
 pandas = ">=3.0.5,<4"
 mr-box-peripheral-board = ">=0.31.9,<0.32"
-dropbot-portable-ui = ">=1.0.0,<2"
 
 # Released plugin packages from the microdrop-plugins channel. They live in
 # a feature so the `test` environment can omit them: plugin repos are tested
@@ -105,14 +104,27 @@ dropbot-portable-ui = ">=1.0.0,<2"
 # copy of the same plugin would shadow it.
 [tool.pixi.feature.plugins.dependencies]
 magnet-microdrop-plugin = ">=1.2.0,<2"
+
+# Portable DropBot stack: the driver UI package and the pyqtgraph plots it
+# uses. Developer and test environments carry it (the Pi runs `default`);
+# the packed `prod` environments target the classic DropBot rig and skip it.
+[tool.pixi.feature.portable.dependencies]
+dropbot-portable-ui = ">=1.0.0,<2"
+pyqtgraph = ">=0.14.0,<0.15"
+
+# Plugins that are developed from their clones next to `src` (the fluorescence
+# and heater repos). Only the packed `prod` environments install the released
+# packages: in a developer environment the installed copy would shadow the
+# clone being worked on.
+[tool.pixi.feature.prod-plugins.dependencies]
 fluorescence-microdrop-plugin = ">=2.5.0,<3"
 heater-microdrop-plugin = ">=1.10.1,<2"
 
 # Conda run-dependencies declared by the plugin repos' own manifests
 # (fluorescence: mpremote, scipy; heater: mpremote). The plugins are run and
-# tested from this workspace's `test` environment with their clones on
-# sys.path, so their runtime dependencies have to be present there. The
-# default environment gets them from the installed plugin packages.
+# tested from this workspace's `default` and `test` environments with their
+# clones on sys.path, so their runtime dependencies have to be present
+# there. The `prod` environments get them from the installed plugin packages.
 [tool.pixi.feature.plugin-deps.dependencies]
 mpremote = ">=1.20"
 scipy = ">=1.18,<2"
@@ -141,11 +153,11 @@ lint-microdrop-imports = { cmd = "lint-imports", cwd = "src" }
 # deployment environment: `pixi install -e prod`, `pixi run -e prod microdrop`.
 # One solve-group keeps package versions identical across all three.
 [tool.pixi.environments]
-default = { features = ["plugins", "ai", "dev"], solve-group = "default" }
-test = { features = ["plugin-deps", "dev"], solve-group = "default" }
-prod = { features = ["plugins", "ai"], solve-group = "default" }
+default = { features = ["plugins", "plugin-deps", "portable", "ai", "dev"], solve-group = "default" }
+test = { features = ["plugin-deps", "portable", "dev"], solve-group = "default" }
+prod = { features = ["plugins", "prod-plugins", "ai"], solve-group = "default" }
 # prod without the AI stack (osam/onnxruntime), for the smaller hand-off build.
-prod-no-ai = { features = ["plugins"], solve-group = "default" }
+prod-no-ai = { features = ["plugins", "prod-plugins"], solve-group = "default" }
 
 # --- TARGET: Windows (win-64) ---
 [tool.pixi.target.win-64.dependencies]

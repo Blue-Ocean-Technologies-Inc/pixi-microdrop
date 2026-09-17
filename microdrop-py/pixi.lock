@@ -473,8 +473,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/whichcraft-0.6.1-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/wsproto-1.3.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
-      - conda: https://prefix.dev/microdrop-plugins/noarch/fluorescence-microdrop-plugin-2.5.0-pyh4616a5c_0.conda
-      - conda: https://prefix.dev/microdrop-plugins/noarch/heater-microdrop-plugin-1.10.1-pyh4616a5c_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.2.1-pyh4616a5c_0.conda
       - pypi: ../pyside6-icu-preload
       - pypi: ./
@@ -894,8 +892,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-ng-2.3.3-h31dac16_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.25.0-py313h2f871a8_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.7-hf451053_7.conda
-      - conda: https://prefix.dev/microdrop-plugins/noarch/fluorescence-microdrop-plugin-2.5.0-pyh4616a5c_0.conda
-      - conda: https://prefix.dev/microdrop-plugins/noarch/heater-microdrop-plugin-1.10.1-pyh4616a5c_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.2.1-pyh4616a5c_0.conda
       - pypi: ../pyside6-icu-preload
       - pypi: ./
@@ -1346,8 +1342,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/whichcraft-0.6.1-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/wsproto-1.3.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
-      - conda: https://prefix.dev/microdrop-plugins/noarch/fluorescence-microdrop-plugin-2.5.0-pyh4616a5c_0.conda
-      - conda: https://prefix.dev/microdrop-plugins/noarch/heater-microdrop-plugin-1.10.1-pyh4616a5c_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.2.1-pyh4616a5c_0.conda
       - pypi: ../pyside6-icu-preload
       - pypi: ./
@@ -1722,8 +1716,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.25.0-py313h5fd188c_4.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.7-h534d264_7.conda
       - conda: https://conda.anaconda.org/vignesh229/win-64/redis-server-3.0.501-0.tar.bz2
-      - conda: https://prefix.dev/microdrop-plugins/noarch/fluorescence-microdrop-plugin-2.5.0-pyh4616a5c_0.conda
-      - conda: https://prefix.dev/microdrop-plugins/noarch/heater-microdrop-plugin-1.10.1-pyh4616a5c_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.2.1-pyh4616a5c_0.conda
       - pypi: ../pyside6-icu-preload
       - pypi: ./
@@ -1765,8 +1757,6 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.0.0-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.0.0-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -2099,7 +2089,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pygments-2.21.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pypandoc-1.17-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.3.2-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pyqtgraph-0.14.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pyserial-3.5-pyhcf101f3_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pysocks-1.7.1-pyha55dd90_7.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pytest-9.1.1-pyhc364b38_2.conda
@@ -2168,8 +2157,6 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.0.0-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.0.0-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -2259,7 +2246,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pygments-2.21.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pypandoc-1.17-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.3.2-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pyqtgraph-0.14.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pyserial-3.5-pyhcf101f3_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pysocks-1.7.1-pyha55dd90_7.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pytest-9.1.1-pyhc364b38_2.conda
@@ -2533,8 +2519,6 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.0.0-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.0.0-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -2857,7 +2841,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pygments-2.21.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pypandoc-1.17-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.3.2-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pyqtgraph-0.14.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pyserial-3.5-pyhcf101f3_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pysocks-1.7.1-pyha55dd90_7.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pytest-9.1.1-pyhc364b38_2.conda
@@ -2925,8 +2908,6 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.0.0-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.0.0-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -3017,7 +2998,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pygments-2.21.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pypandoc-1.17-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.3.2-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pyqtgraph-0.14.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pyserial-3.5-pyhcf101f3_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pysocks-1.7.1-pyh09c184e_7.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pytest-9.1.1-pyhc364b38_2.conda
@@ -3255,8 +3235,6 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.0.0-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.0.0-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -3588,7 +3566,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pygments-2.21.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pypandoc-1.17-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.3.2-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pyqtgraph-0.14.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pyserial-3.5-pyhcf101f3_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pysocks-1.7.1-pyha55dd90_7.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pytest-9.1.1-pyhc364b38_2.conda
@@ -3650,8 +3627,6 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.0.0-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.0.0-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -3740,7 +3715,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pygments-2.21.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pypandoc-1.17-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.3.2-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pyqtgraph-0.14.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pyserial-3.5-pyhcf101f3_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pysocks-1.7.1-pyha55dd90_7.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pytest-9.1.1-pyhc364b38_2.conda
@@ -4003,8 +3977,6 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.0.0-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.0.0-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -4326,7 +4298,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pygments-2.21.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pypandoc-1.17-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.3.2-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pyqtgraph-0.14.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pyserial-3.5-pyhcf101f3_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pysocks-1.7.1-pyha55dd90_7.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pytest-9.1.1-pyhc364b38_2.conda
@@ -4387,8 +4358,6 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.0.0-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.0.0-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -4478,7 +4447,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pygments-2.21.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pypandoc-1.17-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.3.2-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pyqtgraph-0.14.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pyserial-3.5-pyhcf101f3_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pysocks-1.7.1-pyh09c184e_7.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pytest-9.1.1-pyhc364b38_2.conda
