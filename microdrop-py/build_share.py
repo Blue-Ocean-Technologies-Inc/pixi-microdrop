@@ -23,6 +23,7 @@ Usage: python build_share.py <platform> <environment>
 
 # Standard library imports.
 import json
+import re
 import shutil
 import sys
 import tarfile
@@ -42,6 +43,8 @@ PIXI_UNPACK_URL = (
     "https://github.com/Quantco/pixi-pack/releases/download/"
     "v{version}/pixi-unpack-x86_64-pc-windows-msvc.exe"
 )
+
+DIRTY_VERSION = re.compile(r"\.d\d{8}$")
 
 #: Must match the fluorescence plugin's DEFAULT_AI_MODEL, or the bundled
 #: weights are not the ones the app asks for.
@@ -88,6 +91,14 @@ def read_pack_info(pack_path):
 
     if microdrop_version is None:
         raise ValueError(f"{pack_path} contains no microdrop_py wheel")
+
+    # hatch-vcs appends .dYYYYMMDD when `src` has uncommitted changes. A
+    # hand-off built from that cannot be reproduced or traced to a commit.
+    if DIRTY_VERSION.search(microdrop_version):
+        raise SystemExit(
+            f"MicroDrop {microdrop_version} was built from a `src` checkout with "
+            f"uncommitted changes - commit or stash them and re-run the pack"
+        )
 
     return pixi_pack_version, microdrop_version, has_ai
 
