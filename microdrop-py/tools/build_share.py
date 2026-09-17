@@ -18,7 +18,7 @@ AI ROI detection works without a first-use download.
 Everything here is reproducible from the repo plus downloads, so the output
 lives under the git-ignored ``dist/`` and can be deleted freely.
 
-Usage: python build_share.py <platform> <environment>
+Usage: python tools/build_share.py <platform> <environment>
 """
 
 # Standard library imports.
@@ -31,9 +31,9 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-ROOT = Path(__file__).parent
-DIST = ROOT / "dist"
-TEMPLATES = ROOT / "share"
+TOOLS = Path(__file__).parent
+DIST = TOOLS.parent / "dist"
+TEMPLATES = TOOLS / "share"
 
 #: The install/run scripts are Windows batch files; other platforms have no
 #: hand-off scripts yet.

@@ -25,7 +25,7 @@ The small Python helpers (clang_helpers, conda_helpers, nanopb_helpers,
 pypandoc) are imported at module level by the driver and must stay; only the
 binaries behind them are stripped.
 
-Usage: python prune_pack.py <pack.tar> <slim.tar>
+Usage: python tools/prune_pack.py <pack.tar> <slim.tar>
 """
 
 # Standard library imports.
