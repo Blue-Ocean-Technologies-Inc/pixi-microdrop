@@ -184,6 +184,11 @@ run_redis = { cmd = "python start_redis_server.py", cwd = "src/examples/" }
 # Usage: `pixi run pack-prod win-64` -> dist/microdrop-prod-win-64.tar
 build-wheels = { cmd = "rm -rf dist/wheels && pixi exec uv build --wheel -o dist/wheels . && pixi exec uv build --wheel -o dist/wheels ../pyside6-icu-preload" }
 pack-prod = { cmd = "pixi exec pixi-pack --environment {{ environment }} --platform {{ platform }} --ignore-pypi-non-wheel --use-cache dist/pack-cache --inject dist/wheels/microdrop_py-*.whl --inject dist/wheels/pyside6_icu_preload-*.whl -o dist/microdrop-{{ environment }}-{{ platform }}.tar", args = ["platform", { arg = "environment", default = "prod" }], depends-on = ["build-wheels"] }
+# The pack minus the firmware build toolchain (clang, git) that the DropBot
+# driver chain declares as run dependencies — see prune_pack.py.
+# Usage: `pixi run pack-prod-slim win-64` -> dist/microdrop-prod-slim-win-64.tar
+#        `pixi run pack-prod-slim win-64 prod-no-ai` for the build without AI
+pack-prod-slim = { cmd = "python prune_pack.py dist/microdrop-{{ environment }}-{{ platform }}.tar dist/microdrop-{{ environment }}-slim-{{ platform }}.tar", args = ["platform", { arg = "environment", default = "prod" }], depends-on = [{ task = "pack-prod", args = ["{{ platform }}", "{{ environment }}"] }] }
 # Same pack as a self-extracting script, so the user needs no pixi-unpack
 # binary. Linux/macOS only (.sh): the win-64 .ps1 embeds the ~1.2 GB archive
 # as base64 text and PowerShell fails to load it ("An error occurred while
