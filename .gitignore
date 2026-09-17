@@ -27,3 +27,10 @@ microdrop-py/demo/
 
 # Built by CI (release-setup-exe workflow) — download from GitHub Releases
 microdrop_setup.exe
+
+# `pixi run pack-prod` output: built wheels and the packed prod environment
+microdrop-py/dist/
+
+# Hand-off folders/zips for sending a packed Windows install to a user
+share-microdrop*/
+share-microdrop*.zip
