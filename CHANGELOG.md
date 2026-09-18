@@ -1,3 +1,9 @@
+## [v0.3.1](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.3.1) (2026-09-18)
+
+### Fix
+
+- **launcher**: import the portable backend plugin lazily ([`7253aa6`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/7253aa689c9281d4e61234dafcd1a3899dd12a36))
+
 ## [v0.3.0](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.3.0) (2026-09-17)
 
 ### Feat
