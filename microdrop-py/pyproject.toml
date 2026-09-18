@@ -209,6 +209,10 @@ pack-prod-slim = { cmd = "python tools/prune_pack.py dist/microdrop-{{ environme
 share-prod = { cmd = "python tools/build_share.py {{ platform }} {{ environment }}", args = ["platform", { arg = "environment", default = "prod" }], depends-on = [{ task = "pack-prod-slim", args = ["{{ platform }}", "{{ environment }}"] }] }
 # Both hand-off zips in one go: `pixi run share-prod-all` (win-64 by default).
 share-prod-all = { args = [{ arg = "platform", default = "win-64" }], depends-on = [{ task = "share-prod", args = ["{{ platform }}", "prod"] }, { task = "share-prod", args = ["{{ platform }}", "prod-no-ai"] }] }
+# Once the zips are built the rest of dist/ (full and slim packs, wheels, the
+# unzipped hand-off folders) is several GB of intermediates. Drop them, keeping
+# the share-microdrop-*.zip files and the pack-cache download cache.
+clean-dist = { cmd = "python tools/clean_dist.py" }
 # Same pack as a self-extracting script, so the user needs no pixi-unpack
 # binary. Linux/macOS only (.sh): the win-64 .ps1 embeds the ~1.2 GB archive
 # as base64 text and PowerShell fails to load it ("An error occurred while
