@@ -1,3 +1,9 @@
+## [v0.5.0](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.5.0) (2026-09-18)
+
+### Feat
+
+- **tools**: add a clean-dist task for the pack intermediates ([`703574d`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/703574d36c4f9c4a52cb3d8e5e20bc1ac89edce7))
+
 ## [v0.4.0](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.4.0) (2026-09-18)
 
 ### Feat
