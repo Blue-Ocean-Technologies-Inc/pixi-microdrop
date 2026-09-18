@@ -94,6 +94,18 @@ echo.
 echo NOTE: the install is tied to this folder. If you move or rename the
 echo folder, run install.bat again.
 
+rem Only install.bat reads the pack, so once the env is in place it just
+rem takes up space. Offer to delete it, but a reinstall (e.g. after moving
+rem the folder) needs it, so say so. The size is under 2 GB, so set /a
+rem (32-bit) is safe.
+for %%F in ("%PACK%") do set /a PACK_MB=%%~zF / 1048576
+echo.
+echo The packed environment %PACK% (%PACK_MB% MB) is no longer needed
+echo to run MicroDrop. Without it, though, install.bat cannot run again
+echo (e.g. after moving this folder) until you unzip the download again.
+choice /c YN /m "Delete %PACK% now"
+if not errorlevel 2 del /q "%PACK%" && echo Deleted %PACK%.
+
 rem Each older install left its own "MicroDrop <version>" shortcut on the
 rem Desktop, pointing at run-microdrop.bat in its folder. Now that this
 rem version supersedes them, remove those shortcuts and offer to delete each
