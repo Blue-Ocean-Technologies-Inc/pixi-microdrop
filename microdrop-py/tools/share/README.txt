@@ -10,8 +10,10 @@ installed, and no internet connection is needed.
 2. Double-click  install.bat   (once; takes about 10 minutes, needs ~6 GB
    free, under 1 GB once done).
 
-3. Start MicroDrop with the MicroDrop shortcut (created in this folder and
-   on your Desktop by install.bat), or double-click  run-microdrop.bat.
+3. Start MicroDrop with the "MicroDrop {version}" shortcut (created in this
+   folder and on your Desktop by install.bat), or double-click
+   run-microdrop.bat. The version in the name keeps several installed
+   versions apart on the Desktop.
 
 
 Other devices

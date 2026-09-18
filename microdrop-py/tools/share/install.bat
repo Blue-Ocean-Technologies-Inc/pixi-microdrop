@@ -73,16 +73,22 @@ if exist "models\sha256-*" if not exist "%OSAM_BLOBS%" mkdir "%OSAM_BLOBS%"
 for %%M in (models\sha256-*) do if not exist "%OSAM_BLOBS%\%%~nxM" copy /y "%%M" "%OSAM_BLOBS%\" >nul
 if exist "models\sha256-*" echo Installed the offline AI model for fluorescence ROI detection.
 
-rem A .bat cannot carry an icon, so make a MicroDrop shortcut that does. It
-rem holds absolute paths, which is why it is created here and not shipped.
-rem An existing Desktop shortcut of the same name is left alone.
+rem A .bat cannot carry an icon, so make a "MicroDrop <version>" shortcut
+rem that does. It holds absolute paths, which is why it is created here and
+rem not shipped. The version in the name keeps several installed versions
+rem apart on the Desktop; an existing Desktop shortcut of the same name is
+rem left alone. The version is read from the installed package.
 set "MD_DIR=%CD%"
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$d = $env:MD_DIR; $sh = New-Object -ComObject WScript.Shell; $targets = @((Join-Path $d 'MicroDrop.lnk')); $deskDir = [Environment]::GetFolderPath('Desktop'); if ($deskDir) { $desk = Join-Path $deskDir 'MicroDrop.lnk'; if (-not (Test-Path $desk)) { $targets += $desk } }; foreach ($p in $targets) { $l = $sh.CreateShortcut($p); $l.TargetPath = Join-Path $d 'run-microdrop.bat'; $l.WorkingDirectory = $d; $l.IconLocation = (Join-Path $d 'env\Lib\site-packages\microdrop_style\icons\Microdrop_Icon.ico') + ',0'; $l.Description = 'MicroDrop'; $l.Save() }"
-if errorlevel 1 echo WARNING: could not create the MicroDrop shortcut - use run-microdrop.bat instead.
+set "MD_VERSION="
+for /f "usebackq delims=" %%V in (`env\python.exe -c "import importlib.metadata as m; print(m.version('microdrop_py'))"`) do set "MD_VERSION=%%V"
+set "MD_NAME=MicroDrop"
+if defined MD_VERSION set "MD_NAME=MicroDrop %MD_VERSION%"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$d = $env:MD_DIR; $name = $env:MD_NAME + '.lnk'; $sh = New-Object -ComObject WScript.Shell; $targets = @((Join-Path $d $name)); $deskDir = [Environment]::GetFolderPath('Desktop'); if ($deskDir) { $desk = Join-Path $deskDir $name; if (-not (Test-Path $desk)) { $targets += $desk } }; foreach ($p in $targets) { $l = $sh.CreateShortcut($p); $l.TargetPath = Join-Path $d 'run-microdrop.bat'; $l.WorkingDirectory = $d; $l.IconLocation = (Join-Path $d 'env\Lib\site-packages\microdrop_style\icons\Microdrop_Icon.ico') + ',0'; $l.Description = $env:MD_NAME; $l.Save() }"
+if errorlevel 1 echo WARNING: could not create the %MD_NAME% shortcut - use run-microdrop.bat instead.
 
 echo.
-echo Done. Start MicroDrop with the MicroDrop shortcut in this folder
-echo (and on your Desktop, unless one named MicroDrop was already there),
+echo Done. Start MicroDrop with the "%MD_NAME%" shortcut in this folder
+echo (and on your Desktop, unless one with that name was already there),
 echo or double-click run-microdrop.bat.
 echo.
 echo NOTE: the install is tied to this folder. If you move or rename the
