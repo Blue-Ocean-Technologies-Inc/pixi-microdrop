@@ -1,3 +1,15 @@
+## [v0.4.0](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.4.0) (2026-09-18)
+
+### Feat
+
+- **share**: offer to delete the pack once installed ([`c495c3a`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/c495c3aea1031f645c9799211f1ff0f0eb9cf2d5))
+- **share**: retire previous installs when a new version lands ([`41597fe`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/41597feae868fabb4aeb82bba7730ad4f7f5aa52))
+- **share**: name the shortcut after the installed version ([`4f2ac2c`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/4f2ac2c89167bdb81727c57a1db8aed11f926309))
+
+### Perf
+
+- **share**: compress the install with XPRESS16K instead of LZX ([`c19aa7f`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/c19aa7fbfe87e4e8ebc15ff975328fd80c5689e1))
+
 ## [v0.3.1](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.3.1) (2026-09-18)
 
 ### Fix
