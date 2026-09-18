@@ -52,13 +52,16 @@ if not exist "env\Scripts\microdrop.exe" (
 rem Shrink the install. First drop files only a compiler would use (import
 rem libraries, debug symbols, C headers) - nothing loads them at run time.
 rem Then apply Windows' transparent file compression: files stay readable in
-rem place, the env just takes about a third of the disk space. Both steps
-rem are optional, so a failure (e.g. a non-NTFS drive) never fails the install.
+rem place, the env just takes under half the disk space. XPRESS16K rather
+rem than LZX: LZX squeezes out ~20% more but takes ten times as long (2.5 min
+rem vs 16 s on a 1.9 GB env) and is slower to read back at every app start.
+rem Both steps are optional, so a failure (e.g. a non-NTFS drive) never fails
+rem the install.
 set "MD_DIR=%CD%"
 echo.
-echo Compressing the install to save disk space - this takes a few minutes...
+echo Compressing the install to save disk space...
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$e = Join-Path $env:MD_DIR 'env'; Get-ChildItem $e -Recurse -File -Force -Include *.lib,*.pdb,*.a -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue; foreach ($i in 'Library\include','include') { $p = Join-Path $e $i; if (Test-Path $p) { Remove-Item $p -Recurse -Force -ErrorAction SilentlyContinue } }; exit 0"
-compact /c /s:"%MD_DIR%\env" /a /i /q /exe:lzx >nul 2>&1
+compact /c /s:"%MD_DIR%\env" /a /i /q /exe:xpress16k >nul 2>&1
 if errorlevel 1 echo NOTE: could not compress the install (non-NTFS drive?). MicroDrop still works; it just uses more disk space.
 
 rem The fluorescence plugin's AI ROI detection loads its SAM model weights
