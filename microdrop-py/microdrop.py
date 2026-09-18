@@ -23,6 +23,7 @@ With no arguments this launches the full dropbot frontend + backend set.
 import argparse
 
 # Microdrop package imports.
+from examples import plugin_consts
 from examples.plugin_consts import (
     BACKEND_APPLICATION,
     BACKEND_PLUGINS,
@@ -34,7 +35,6 @@ from examples.plugin_consts import (
     MOCK_DROPBOT_FRONTEND_PLUGINS,
     OPENDROP_BACKEND_PLUGINS,
     OPENDROP_FRONTEND_PLUGINS,
-    PORTABLE_DROPBOT_BACKEND_PLUGINS,
     PORTABLE_DROPBOT_FRONTEND_PLUGINS,
     REQUIRED_CONTEXT,
     REQUIRED_PLUGINS,
@@ -42,6 +42,31 @@ from examples.plugin_consts import (
     SERVICE_PLUGINS,
 )
 from examples.run_device_viewer_pluggable import main
+
+#: The portable backend plugins, known by name so they can be selected
+#: without importing them: their module pulls in the dropbot_portable driver
+#: stack, which only a portable run needs (src loads them lazily).
+PORTABLE_DROPBOT_BACKEND_PLUGIN_NAMES = ("PortableDropbotControllerPlugin",)
+
+
+def _load_portable_dropbot_backend_plugins():
+    """Import the portable backend plugin classes on first use.
+
+    Src before the lazy loader (the submodule the launcher pins until its
+    next bump) still exports them as an eager list.
+    """
+    loader = getattr(plugin_consts, "_lazy_load_portable_dropbot_plugins", None)
+
+    if loader is None:
+        return plugin_consts.PORTABLE_DROPBOT_BACKEND_PLUGINS
+
+    return loader()
+
+
+def _plugin_name(plugin):
+    """A plugin class's name; lazily loaded plugins are listed by name."""
+    return plugin if isinstance(plugin, str) else plugin.__name__
+
 
 # Canonical load order — plugin_consts order decides Envisage service
 # priority, so user selections are re-sorted to this order.
@@ -54,7 +79,7 @@ _ORDERED_OPTIONAL_GROUPS = (
     SERVICE_PLUGINS,
     BACKEND_PLUGINS,
     DROPBOT_BACKEND_PLUGINS,
-    PORTABLE_DROPBOT_BACKEND_PLUGINS,
+    PORTABLE_DROPBOT_BACKEND_PLUGIN_NAMES,
     OPENDROP_BACKEND_PLUGINS,
     MOCK_DROPBOT_BACKEND_PLUGINS,
 )
@@ -72,11 +97,14 @@ _FRONTEND_PLUGIN_SET = frozenset(
 )
 
 # name -> class, in canonical order (setdefault keeps the first position of
-# a plugin that appears in more than one group)
+# a plugin that appears in more than one group); None for a plugin imported
+# only when selected (see _resolve_plugin)
 OPTIONAL_PLUGINS = {}
 for _group in _ORDERED_OPTIONAL_GROUPS:
     for _plugin in _group:
-        OPTIONAL_PLUGINS.setdefault(_plugin.__name__, _plugin)
+        OPTIONAL_PLUGINS.setdefault(
+            _plugin_name(_plugin), None if isinstance(_plugin, str) else _plugin
+        )
 
 CONTEXTS = {
     "redis_server": SERVER_CONTEXT,
@@ -91,7 +119,7 @@ _DEVICE_FRONTEND_GROUPS = {
 }
 _DEVICE_BACKEND_GROUPS = {
     "dropbot": [DROPBOT_BACKEND_PLUGINS],
-    "portable": [PORTABLE_DROPBOT_BACKEND_PLUGINS],
+    "portable": [PORTABLE_DROPBOT_BACKEND_PLUGIN_NAMES],
     "opendrop": [OPENDROP_BACKEND_PLUGINS],
     "mock": [MOCK_DROPBOT_BACKEND_PLUGINS],
 }
@@ -104,7 +132,21 @@ def _default_plugin_names(device):
         + [SERVICE_PLUGINS, BACKEND_PLUGINS]
         + _DEVICE_BACKEND_GROUPS[device]
     )
-    return [plugin.__name__ for group in groups for plugin in group]
+    return [_plugin_name(plugin) for group in groups for plugin in group]
+
+
+def _resolve_plugin(name):
+    """The plugin class for a selected name, importing a lazy one now."""
+    plugin = OPTIONAL_PLUGINS[name]
+
+    if plugin is not None:
+        return plugin
+
+    return next(
+        plugin
+        for plugin in _load_portable_dropbot_backend_plugins()
+        if plugin.__name__ == name
+    )
 
 
 def resolve_run_config(device="dropbot", plugin_names=None, context_names=None):
@@ -123,7 +165,7 @@ def resolve_run_config(device="dropbot", plugin_names=None, context_names=None):
             f"Valid names: {', '.join(OPTIONAL_PLUGINS)}"
         )
     selected = set(plugin_names)
-    optional = [plugin for name, plugin in OPTIONAL_PLUGINS.items() if name in selected]
+    optional = [_resolve_plugin(name) for name in OPTIONAL_PLUGINS if name in selected]
     has_frontend = any(plugin in _FRONTEND_PLUGIN_SET for plugin in optional)
 
     if not context_names:
