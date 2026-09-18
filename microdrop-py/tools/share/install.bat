@@ -94,6 +94,14 @@ echo.
 echo NOTE: the install is tied to this folder. If you move or rename the
 echo folder, run install.bat again.
 
+rem Each older install left its own "MicroDrop <version>" shortcut on the
+rem Desktop, pointing at run-microdrop.bat in its folder. Now that this
+rem version supersedes them, remove those shortcuts and offer to delete each
+rem old install folder. A folder is only offered when its shortcut points
+rem at a run-microdrop.bat inside it and it holds an install.bat; this
+rem folder and any parent of it are never offered.
+for /f "usebackq delims=" %%O in (`powershell -NoProfile -ExecutionPolicy Bypass -Command "$d = $env:MD_DIR; $sh = New-Object -ComObject WScript.Shell; $deskDir = [Environment]::GetFolderPath('Desktop'); $olds = @(); if ($deskDir) { foreach ($p in Get-ChildItem -Path (Join-Path $deskDir 'MicroDrop*.lnk') -ErrorAction SilentlyContinue) { $t = $sh.CreateShortcut($p.FullName).TargetPath; if ($t -and (Split-Path $t -Leaf) -ieq 'run-microdrop.bat') { $old = Split-Path $t -Parent; if ($old -ine $d) { Remove-Item $p.FullName -Force; if ((Test-Path (Join-Path $old 'install.bat')) -and -not ($d + '\').StartsWith($old + '\', 'OrdinalIgnoreCase') -and $olds -notcontains $old) { $olds += $old } } } } }; $olds"`) do call :remove_old "%%O"
+
 :done
 echo.
 pause
@@ -103,3 +111,19 @@ exit /b 0
 echo.
 pause
 exit /b 1
+
+rem Offer to delete one previous install folder (%1). Its Desktop shortcut
+rem has already been removed by the sweep above.
+:remove_old
+echo.
+echo A previous MicroDrop install was found in:
+echo   %~1
+echo Its Desktop shortcut has been removed. The install itself still works
+echo from run-microdrop.bat in that folder.
+choice /c YN /m "Delete that previous install completely"
+if errorlevel 2 goto :eof
+
+echo Deleting %~1 ...
+rmdir /s /q "%~1"
+if exist "%~1" (echo WARNING: could not delete it - close MicroDrop if it is running there, then delete the folder by hand.) else (echo Deleted.)
+goto :eof

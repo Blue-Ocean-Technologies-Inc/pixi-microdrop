@@ -13,7 +13,8 @@ installed, and no internet connection is needed.
 3. Start MicroDrop with the "MicroDrop {version}" shortcut (created in this
    folder and on your Desktop by install.bat), or double-click
    run-microdrop.bat. The version in the name keeps several installed
-   versions apart on the Desktop.
+   versions apart on the Desktop. Installing a newer version removes the
+   older versions' Desktop shortcuts and offers to delete their folders.
 
 
 Other devices
@@ -32,7 +33,7 @@ Troubleshooting
 - Moved or renamed the folder: run install.bat again and answer Y.
 - On a drive that is not NTFS the install still works, but it is not
   compressed and takes about 2 GB.
-- To uninstall: delete this folder.
+- To uninstall: delete this folder (and its shortcut on the Desktop).
 
 
 Files
