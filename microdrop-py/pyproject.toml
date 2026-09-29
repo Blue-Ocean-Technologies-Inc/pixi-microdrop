@@ -117,7 +117,7 @@ pyqtgraph = ">=0.14.0,<0.15"
 # packages: in a developer environment the installed copy would shadow the
 # clone being worked on.
 [tool.pixi.feature.prod-plugins.dependencies]
-fluorescence-microdrop-plugin = ">=2.5.0,<3"
+fluorescence-microdrop-plugin = ">=3.0.0,<4"
 heater-microdrop-plugin = ">=1.10.1,<2"
 
 # Conda run-dependencies declared by the plugin repos' own manifests
@@ -129,8 +129,8 @@ heater-microdrop-plugin = ">=1.10.1,<2"
 mpremote = ">=1.20"
 scipy = ">=1.18,<2"
 
-# Optional stack behind the fluorescence plugin's AI ROI detection: osam runs
-# the SAM models on onnxruntime (CPU build). The plugin degrades gracefully
+# Optional stack behind the image viewer's AI ROI detection: osam runs the
+# SAM models on onnxruntime (CPU build). The viewer degrades gracefully
 # without it, so it is a feature, not a base dependency. Model weights are not
 # a package — osam downloads them to ~/.cache/osam on first use.
 [tool.pixi.feature.ai.pypi-dependencies]
@@ -209,6 +209,16 @@ pack-prod-slim = { cmd = "python tools/prune_pack.py dist/microdrop-{{ environme
 share-prod = { cmd = "python tools/build_share.py {{ platform }} {{ environment }}", args = ["platform", { arg = "environment", default = "prod" }], depends-on = [{ task = "pack-prod-slim", args = ["{{ platform }}", "{{ environment }}"] }] }
 # Both hand-off zips in one go: `pixi run share-prod-all` (win-64 by default).
 share-prod-all = { args = [{ arg = "platform", default = "win-64" }], depends-on = [{ task = "share-prod", args = ["{{ platform }}", "prod"] }, { task = "share-prod", args = ["{{ platform }}", "prod-no-ai"] }] }
+# The git hand-off, for a user who cannot fetch conda packages but can use
+# git: the same offline prod pack (AI included), but MicroDrop ships as a git
+# clone of Microdrop main instead of a wheel, so the user pulls every update
+# pushed to main with update-microdrop.bat — see tools/build_share_git.py.
+# The pack carries no MicroDrop wheel (only the ICU preload) and keeps git.
+# Usage: `pixi run share-prod-git` -> dist/share-microdrop-git-<describe>-win-64.zip
+build-icu-wheel = { cmd = "rm -rf dist/wheels-git && pixi exec uv build --wheel -o dist/wheels-git ../pyside6-icu-preload" }
+pack-prod-git = { cmd = "pixi exec pixi-pack --environment prod --platform {{ platform }} --ignore-pypi-non-wheel --use-cache dist/pack-cache --inject dist/wheels-git/pyside6_icu_preload-*.whl -o dist/microdrop-prod-git-{{ platform }}.tar", args = ["platform"], depends-on = ["build-icu-wheel"] }
+pack-prod-git-slim = { cmd = "python tools/prune_pack.py dist/microdrop-prod-git-{{ platform }}.tar dist/microdrop-prod-git-slim-{{ platform }}.tar --keep git", args = ["platform"], depends-on = [{ task = "pack-prod-git", args = ["{{ platform }}"] }] }
+share-prod-git = { cmd = "python tools/build_share_git.py {{ platform }}", args = [{ arg = "platform", default = "win-64" }], depends-on = [{ task = "pack-prod-git-slim", args = ["{{ platform }}"] }] }
 # Once the zips are built the rest of dist/ (full and slim packs, wheels, the
 # unzipped hand-off folders) is several GB of intermediates. Drop them, keeping
 # the share-microdrop-*.zip files and the pack-cache download cache.

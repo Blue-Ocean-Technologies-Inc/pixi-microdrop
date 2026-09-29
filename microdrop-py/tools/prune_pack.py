@@ -25,14 +25,17 @@ The small Python helpers (clang_helpers, conda_helpers, nanopb_helpers,
 pypandoc) are imported at module level by the driver and must stay; only the
 binaries behind them are stripped.
 
-Usage: python tools/prune_pack.py <pack.tar> <slim.tar>
+Usage: python tools/prune_pack.py <pack.tar> <slim.tar> [--keep NAME ...]
+
+``--keep`` spares named packages from the strip list: the git hand-off keeps
+``git`` so the customer can pull MicroDrop updates without installing it.
 """
 
 # Standard library imports.
+import argparse
 import io
 import json
 import re
-import sys
 import tarfile
 
 #: Conda package names to strip, matched against the repodata record name.
@@ -54,8 +57,9 @@ STRIPPED_PACKAGE_REGEX = re.compile(rf"^({'|'.join(STRIPPED_PACKAGE_PATTERNS)})$
 REPODATA_SECTIONS = ("packages", "packages.conda")
 
 
-def strip_repodata(repodata):
-    """Remove stripped packages from a repodata dict, in place.
+def strip_repodata(repodata, keep=()):
+    """Remove stripped packages from a repodata dict, in place, sparing the
+    package names in ``keep``.
 
     Returns
     -------
@@ -71,7 +75,7 @@ def strip_repodata(repodata):
         for filename in list(records):
             name = records[filename]["name"]
 
-            if STRIPPED_PACKAGE_REGEX.match(name):
+            if STRIPPED_PACKAGE_REGEX.match(name) and name not in keep:
                 removed[filename] = name
                 del records[filename]
 
@@ -99,7 +103,7 @@ def add_bytes(tar, member, data):
     tar.addfile(member, io.BytesIO(data))
 
 
-def prune_pack(source_path, slim_path):
+def prune_pack(source_path, slim_path, keep=()):
     # Pass 1: the repodata files decide which archives go, and they can sit
     # anywhere in the tar relative to the archives they index.
     slim_repodata = {}
@@ -113,7 +117,7 @@ def prune_pack(source_path, slim_path):
             repodata = json.load(source.extractfile(member))
             subdir = member.name.rsplit("/", 1)[0]
 
-            for filename, name in strip_repodata(repodata).items():
+            for filename, name in strip_repodata(repodata, keep).items():
                 removed_archives[f"{subdir}/{filename}"] = name
 
             slim_repodata[member.name] = json.dumps(repodata).encode()
@@ -158,4 +162,10 @@ def prune_pack(source_path, slim_path):
 
 
 if __name__ == "__main__":
-    prune_pack(sys.argv[1], sys.argv[2])
+    parser = argparse.ArgumentParser(description="Strip build-toolchain packages")
+    parser.add_argument("source")
+    parser.add_argument("slim")
+    parser.add_argument("--keep", nargs="*", default=[], help="package names to keep")
+    args = parser.parse_args()
+
+    prune_pack(args.source, args.slim, set(args.keep))
