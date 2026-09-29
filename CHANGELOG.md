@@ -1,3 +1,13 @@
+## [v0.6.0](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.6.0) (2026-09-29)
+
+### Feat
+
+- **tools**: add the share-prod-git hand-off ([`48a8a48`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/48a8a4820420927acf3e88cc42c5a75828231572))
+
+### Fix
+
+- **deps**: take the fluorescence plugin 3.0 ([`7f96ab0`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/7f96ab084231203c290d219587aeb92f5cf4cf3c))
+
 ## [v0.5.0](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.5.0) (2026-09-18)
 
 ### Feat
