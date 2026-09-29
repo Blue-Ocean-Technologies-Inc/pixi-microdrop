@@ -117,7 +117,7 @@ pyqtgraph = ">=0.14.0,<0.15"
 # packages: in a developer environment the installed copy would shadow the
 # clone being worked on.
 [tool.pixi.feature.prod-plugins.dependencies]
-fluorescence-microdrop-plugin = ">=2.5.0,<3"
+fluorescence-microdrop-plugin = ">=3.0.0,<4"
 heater-microdrop-plugin = ">=1.10.1,<2"
 
 # Conda run-dependencies declared by the plugin repos' own manifests
@@ -129,8 +129,8 @@ heater-microdrop-plugin = ">=1.10.1,<2"
 mpremote = ">=1.20"
 scipy = ">=1.18,<2"
 
-# Optional stack behind the fluorescence plugin's AI ROI detection: osam runs
-# the SAM models on onnxruntime (CPU build). The plugin degrades gracefully
+# Optional stack behind the image viewer's AI ROI detection: osam runs the
+# SAM models on onnxruntime (CPU build). The viewer degrades gracefully
 # without it, so it is a feature, not a base dependency. Model weights are not
 # a package — osam downloads them to ~/.cache/osam on first use.
 [tool.pixi.feature.ai.pypi-dependencies]
