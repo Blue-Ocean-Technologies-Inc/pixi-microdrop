@@ -130,9 +130,10 @@ mpremote = ">=1.20"
 scipy = ">=1.18,<2"
 
 # Optional stack behind the image viewer's AI ROI detection: osam runs the
-# SAM models on onnxruntime (CPU build). The viewer degrades gracefully
-# without it, so it is a feature, not a base dependency. Model weights are not
-# a package — osam downloads them to ~/.cache/osam on first use.
+# SAM models on onnxruntime (CPU build). Only the packed `prod` environment
+# carries it, so offline hand-offs keep AI ROI detection; a developer
+# environment gets it from the app's Help > Install AI ROI Support. Model
+# weights are not a package — osam downloads them to ~/.cache/osam.
 [tool.pixi.feature.ai.pypi-dependencies]
 osam = ">=0.8.1,<0.9"
 
@@ -161,7 +162,7 @@ lint-microdrop-imports = { cmd = "lint-imports", cwd = "src" }
 # deployment environment: `pixi install -e prod`, `pixi run -e prod microdrop`.
 # One solve-group keeps package versions identical across all three.
 [tool.pixi.environments]
-default = { features = ["plugins", "plugin-deps", "portable", "ai", "dev"], solve-group = "default" }
+default = { features = ["plugins", "plugin-deps", "portable", "dev"], solve-group = "default" }
 test = { features = ["plugin-deps", "portable", "dev"], solve-group = "default" }
 # local-test = { features = ["plugin-deps", "portable", "dev", "local-dev"], solve-group = "default" }
 prod = { features = ["plugins", "prod-plugins", "ai"], solve-group = "default" }
