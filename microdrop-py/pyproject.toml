@@ -137,6 +137,11 @@ scipy = ">=1.18,<2"
 [tool.pixi.feature.ai.pypi-dependencies]
 osam = ">=0.8.1,<0.9"
 
+# Windows packs the DirectML GPU build beside the CPU one (~3x faster SAM
+# encodes); prod only, like osam itself.
+[tool.pixi.feature.ai.target.win-64.pypi-dependencies]
+onnxruntime-directml = ">=1.24.4, <2"
+
 # Developer tooling — test runner, lint/format, import contracts, IDE glue,
 # REPL. Nothing the running app imports, so the `prod` environment omits it.
 [tool.pixi.feature.dev.dependencies]
