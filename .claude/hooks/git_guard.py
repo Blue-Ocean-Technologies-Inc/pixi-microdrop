@@ -20,7 +20,7 @@ Denies:
 - repo-wide ruff or pre-commit runs; adoption is incremental, per touched file
 - committing or pushing while fine-edits mode is on (flag set by prompt_flags)
 
-Asks:
+Reminds (no prompt):
 - any pytest invocation; the test suite runs only when the user asks for it
 
 Informs:
@@ -143,10 +143,9 @@ def main():
         result = {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
-                "permissionDecision": "ask",
-                "permissionDecisionReason": (
-                    "pytest runs only when the user asks for it; the standard "
-                    "check is py_compile + ruff on touched files."
+                "additionalContext": (
+                    "Reminder: pytest runs only when the user asks for it; the "
+                    "standard check is py_compile + ruff on touched files."
                 ),
             }
         }
