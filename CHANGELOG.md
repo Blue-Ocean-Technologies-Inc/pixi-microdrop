@@ -1,3 +1,9 @@
+## [v0.7.0](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.7.0) (2026-09-30)
+
+### Feat
+
+- **env**: pack DirectML onnxruntime in the Windows prod env ([`b8bc510`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/b8bc510f8ae085b9fb6b5c7ed43555aa19f941dd))
+
 ## [v0.6.1](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.6.1) (2026-09-30)
 
 ### Fix
