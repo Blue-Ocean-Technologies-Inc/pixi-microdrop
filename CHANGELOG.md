@@ -1,3 +1,9 @@
+## [v0.6.1](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.6.1) (2026-09-30)
+
+### Fix
+
+- **env**: keep the AI stack in prod only ([`e2245a0`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/e2245a01a4eee04e67f64fbb4fe5c508600494a4))
+
 ## [v0.6.0](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.6.0) (2026-09-29)
 
 ### Feat
