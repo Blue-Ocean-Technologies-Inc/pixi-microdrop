@@ -2,7 +2,7 @@
 exclude: ^microdrop-py/(src|[a-z]+-microdrop-plugin-py)/
 repos:
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.18.0
+    rev: v4.19.0
     hooks:
       - id: commitizen
   - repo: https://github.com/pre-commit/pre-commit-hooks
