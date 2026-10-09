@@ -169,7 +169,7 @@ lint-microdrop-imports = { cmd = "lint-imports", cwd = "src" }
 [tool.pixi.environments]
 default = { features = ["plugins", "plugin-deps", "portable", "dev"], solve-group = "default" }
 test = { features = ["plugin-deps", "portable", "dev"], solve-group = "default" }
- local-test = { features = ["plugin-deps", "portable", "dev", "local-dev", "ai"], solve-group = "default" }
+local-test = { features = ["plugin-deps", "portable", "dev", "local-dev", "ai"], solve-group = "default" }
 prod = { features = ["plugins", "prod-plugins", "ai"], solve-group = "default" }
 # prod without the AI stack (osam/onnxruntime), for the smaller hand-off build.
 prod-no-ai = { features = ["plugins", "prod-plugins"], solve-group = "default" }
