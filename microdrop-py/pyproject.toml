@@ -156,10 +156,10 @@ lint-microdrop-imports = { cmd = "lint-imports", cwd = "src" }
 # Disabled: CI checks out this repo without the plugin clones, so these path
 # dependencies fail `pixi install --locked` there. Uncomment this feature and
 # the `local-test` environment below (then `pixi lock`) to use it locally.
-# [tool.pixi.feature.local-dev.pypi-dependencies]
-# fluorescence_microdrop_plugin = { path = "fluorescence-microdrop-plugin-py", editable = true }
-# heater_microdrop_plugin = { path = "heater-microdrop-plugin-py", editable = true }
-# magnet_microdrop_plugin = { path = "magnet-microdrop-plugin-py", editable = true }
+ [tool.pixi.feature.local-dev.pypi-dependencies]
+ fluorescence_microdrop_plugin = { path = "fluorescence-microdrop-plugin-py", editable = true }
+ heater_microdrop_plugin = { path = "heater-microdrop-plugin-py", editable = true }
+ magnet_microdrop_plugin = { path = "magnet-microdrop-plugin-py", editable = true }
 # gamepad_microdrop_plugin = { path = "gamepad-microdrop-plugin-py", editable = true }
 
 # `default` stays the developer environment, so `pixi run ruff|pytest|...`,
@@ -169,7 +169,7 @@ lint-microdrop-imports = { cmd = "lint-imports", cwd = "src" }
 [tool.pixi.environments]
 default = { features = ["plugins", "plugin-deps", "portable", "dev"], solve-group = "default" }
 test = { features = ["plugin-deps", "portable", "dev"], solve-group = "default" }
-# local-test = { features = ["plugin-deps", "portable", "dev", "local-dev"], solve-group = "default" }
+ local-test = { features = ["plugin-deps", "portable", "dev", "local-dev", "ai"], solve-group = "default" }
 prod = { features = ["plugins", "prod-plugins", "ai"], solve-group = "default" }
 # prod without the AI stack (osam/onnxruntime), for the smaller hand-off build.
 prod-no-ai = { features = ["plugins", "prod-plugins"], solve-group = "default" }
