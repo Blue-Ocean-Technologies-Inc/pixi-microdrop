@@ -96,6 +96,7 @@ setuptools = ">=79.0.0,<85"
 paramiko = ">=5.0.0,<6"
 pandas = ">=3.0.5,<4"
 mr-box-peripheral-board = ">=0.31.9,<0.32"
+send2trash = ">=1.8,<2"
 
 # Released plugin packages from the microdrop-plugins channel. They live in
 # a feature so the `test` environment can omit them: plugin repos are tested
