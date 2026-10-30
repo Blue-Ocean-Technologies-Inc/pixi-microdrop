@@ -223,6 +223,21 @@ pack-prod-slim = { cmd = "python tools/prune_pack.py dist/microdrop-{{ environme
 # Usage: `pixi run share-prod win-64`            -> dist/share-microdrop-<version>-win-64-AI-support.zip
 #        `pixi run share-prod win-64 prod-no-ai` -> dist/share-microdrop-<version>-win-64-no-AI.zip
 share-prod = { cmd = "python tools/build_share.py {{ platform }} {{ environment }}", args = ["platform", { arg = "environment", default = "prod" }], depends-on = [{ task = "pack-prod-slim", args = ["{{ platform }}", "{{ environment }}"] }] }
+# Bring an existing hand-off install up to this lock without a reinstall:
+# every conda and PyPI package the lock has that the customer's pack lacks or
+# has at another version (MicroDrop's own wheel included, except for git
+# installs), as a local conda channel + micromamba + wheels + apply-update.bat
+# from tools/share-update/ — see tools/build_update.py. Relock first. The
+# bases default to every slim pack and hand-off zip in dist/ of the same AI
+# variant (the bundle covers their union); name others with --base
+# (repeatable), or ship the
+# whole environment for an unknown base with --full:
+# `pixi run python tools/build_update.py win-64 prod --base <pack.tar|share zip|install>`.
+# Usage: `pixi run share-update` -> dist/microdrop-update-<date>-win-64-AI-support.zip
+#        `pixi run share-update win-64 prod-no-ai` -> dist/microdrop-update-<date>-win-64-no-AI.zip
+# With one hand-off zip as --base the bundle is named after it:
+# --base dist/share-microdrop-1.23.0-win-64-no-AI.zip -> dist/microdrop-update-<date>-for-1.23.0-win-64-no-AI.zip
+share-update = { cmd = "python tools/build_update.py {{ platform }} {{ environment }}", args = [{ arg = "platform", default = "win-64" }, { arg = "environment", default = "prod" }] }
 # Both hand-off zips in one go: `pixi run share-prod-all` (win-64 by default).
 share-prod-all = { args = [{ arg = "platform", default = "win-64" }], depends-on = [{ task = "share-prod", args = ["{{ platform }}", "prod"] }, { task = "share-prod", args = ["{{ platform }}", "prod-no-ai"] }] }
 # The git hand-off, for a user who cannot fetch conda packages but can use

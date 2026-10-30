@@ -44,6 +44,8 @@ PIXI_UNPACK_URL = (
     "v{version}/pixi-unpack-x86_64-pc-windows-msvc.exe"
 )
 
+USER_AGENT = "microdrop-share-tools"
+
 DIRTY_VERSION = re.compile(r"\.d\d{8}$")
 
 #: Must match the fluorescence plugin's DEFAULT_AI_MODEL, or the bundled
@@ -103,6 +105,12 @@ def read_pack_info(pack_path):
     return pixi_pack_version, microdrop_version, has_ai
 
 
+def handoff_variant(has_ai):
+    """The variant suffix a hand-off zip's name carries for its AI stack."""
+
+    return "AI-support" if has_ai else "no-AI"
+
+
 def fetch_pixi_unpack(version):
     """Return a cached pixi-unpack.exe matching the pack's pixi-pack version."""
 
@@ -111,20 +119,28 @@ def fetch_pixi_unpack(version):
     if cached.exists() and cached.stat().st_size > 0:
         return cached
 
-    cached.parent.mkdir(parents=True, exist_ok=True)
-    url = PIXI_UNPACK_URL.format(version=version)
+    download(PIXI_UNPACK_URL.format(version=version), cached)
+
+    return cached
+
+
+def download(url, target):
+    """Download ``url`` to ``target``, creating its folder."""
+
+    target.parent.mkdir(parents=True, exist_ok=True)
     print(f"downloading {url}")
 
     # Download beside the target and rename, so an interrupted download never
-    # leaves a truncated file that the size check above would accept.
-    partial = cached.with_suffix(".part")
+    # leaves a truncated file that a cache check would accept.
+    partial = target.with_name(target.name + ".part")
 
-    with urllib.request.urlopen(url) as response, open(partial, "wb") as out:
+    # prefix.dev's CDN refuses urllib's default user agent.
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+
+    with urllib.request.urlopen(request) as response, open(partial, "wb") as out:
         shutil.copyfileobj(response, out)
 
-    partial.replace(cached)
-
-    return cached
+    partial.replace(target)
 
 
 def collect_model_blobs(model_name):
@@ -163,7 +179,7 @@ def build_share(platform, environment):
     pixi_pack_version, microdrop_version, has_ai = read_pack_info(pack_path)
 
     folder_name = "share-microdrop" if has_ai else "share-microdrop-no-ai"
-    variant = "AI-support" if has_ai else "no-AI"
+    variant = handoff_variant(has_ai)
     folder = DIST / "share" / folder_name
 
     if folder.exists():
