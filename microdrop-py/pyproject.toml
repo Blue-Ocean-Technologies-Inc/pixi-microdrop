@@ -109,7 +109,7 @@ magnet-microdrop-plugin = ">=1.2.0,<2"
 # uses. Developer and test environments carry it (the Pi runs `default`);
 # the packed `prod` environments target the classic DropBot rig and skip it.
 [tool.pixi.feature.portable.dependencies]
-dropbot-portable-ui = ">=1.0.0,<2"
+dropbot-portable-ui = ">=1.1.0,<2"
 pyqtgraph = ">=0.14.0,<0.15"
 
 # Plugins that are developed from their clones next to `src` (the fluorescence
