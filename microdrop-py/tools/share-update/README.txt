@@ -17,11 +17,11 @@ It installs:
 2. Close MicroDrop.
 
 3. Open the {folder_name} folder and double-click
-   update-plugins.bat   (takes about a minute).
+   apply-update.bat   (takes about a minute).
 
 4. Start MicroDrop again as usual.
 
-If update-plugins.bat cannot find MicroDrop next to it, it asks for the
+If apply-update.bat cannot find MicroDrop next to it, it asks for the
 MicroDrop folder: type or paste its path (e.g. C:\MicroDrop) and press Enter.
 
 
@@ -45,10 +45,10 @@ Troubleshooting
 
 Files
 -----
-update-plugins.bat  installs the plugins into ..\env
+apply-update.bat  installs the plugins into ..\env
 channel\            the plugin packages and the packages they need
-micromamba.exe      package installer used by update-plugins.bat
+micromamba.exe      package installer used by apply-update.bat
 fix-conda-meta.py   prepares the install's package records for micromamba
 update.json         what this update contains and which install it is for
-specs.txt           the exact plugin versions update-plugins.bat installs
+specs.txt           the exact plugin versions apply-update.bat installs
 base-plugins.txt    the plugin versions of the install it was made for

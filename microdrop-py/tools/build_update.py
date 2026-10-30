@@ -14,7 +14,7 @@ A customer's hand-off install is a plain conda prefix (``env/``) unpacked
 from a pixi-pack, with no pixi, no conda and no channel access. This bundle
 brings newer plugin packages to it without a full reinstall: a small local
 conda channel, micromamba to install from it offline, and the
-update-plugins.bat that drives micromamba.
+apply-update.bat that drives micromamba.
 
 The target versions come from this workspace's ``pixi.lock`` (bump the plugin
 pins and relock first); the base is the pack the customer installed. The
@@ -24,7 +24,7 @@ package of their dependency closure that the base has at a different
 version/build - nothing the customer already has is shipped again. Only conda
 packages change: the MicroDrop wheel or git clone is never touched.
 
-Usage: python tools/build_plugin_update.py [platform] [environment]
+Usage: python tools/build_update.py [platform] [environment]
                                            [--base PATH] [--lock PATH]
 
 ``--base`` is the customer's pack: a pixi-pack ``.tar``, a hand-off
@@ -59,7 +59,7 @@ TEMPLATES = TOOLS / "share-update"
 #: The pixi features whose dependencies are the plugin packages to update.
 PLUGIN_FEATURES = ("plugins", "prod-plugins")
 
-#: micromamba release that update-plugins.bat runs (mamba-org/micromamba-releases).
+#: micromamba release that apply-update.bat runs (mamba-org/micromamba-releases).
 MICROMAMBA_VERSION = "2.9.0-0"
 MICROMAMBA_URL = (
     "https://github.com/mamba-org/micromamba-releases/releases/download/"
@@ -71,7 +71,7 @@ RATTLER_INDEX_SPEC = "rattler-index==0.33.1"
 
 CONDA_SUFFIXES = (".conda", ".tar.bz2")
 
-SCRIPTS = ("update-plugins.bat", "fix-conda-meta.py")
+SCRIPTS = ("apply-update.bat", "fix-conda-meta.py")
 
 #: One conda package. ``url``, ``sha256`` and ``depends`` are only known for
 #: packages read from a lock.
@@ -305,7 +305,7 @@ def default_base(environment, platform):
 
 
 def select_install_names(target, base, plugin_names):
-    """The packages update-plugins.bat installs, sorted by name.
+    """The packages apply-update.bat installs, sorted by name.
 
     That is the plugins, plus every package the target environment has and
     the base lacks entirely: those come from dependencies added to the
@@ -446,7 +446,7 @@ def index_channel(channel, platform):
 
 
 def write_manifest(folder, manifest):
-    """Write ``update.json`` and the plain-text lists update-plugins.bat reads.
+    """Write ``update.json`` and the plain-text lists apply-update.bat reads.
 
     ``specs.txt`` holds one ``name=version=build`` spec to install per line;
     ``base-plugins.txt`` the ``conda-meta`` record names of the plugins the
@@ -503,10 +503,10 @@ def build_manifest(
     }
 
 
-def build_plugin_update(platform, environment, base_path=None, lock_path=None):
+def build_update(platform, environment, base_path=None, lock_path=None):
     if platform != HANDOFF_PLATFORM:
         raise SystemExit(
-            f"update-plugins.bat only exists for {HANDOFF_PLATFORM}, not {platform}"
+            f"apply-update.bat only exists for {HANDOFF_PLATFORM}, not {platform}"
         )
 
     base_path = base_path or default_base(environment, platform)
@@ -523,7 +523,7 @@ def build_plugin_update(platform, environment, base_path=None, lock_path=None):
     install = [target[name] for name in install_names]
 
     date = datetime.date.today().isoformat()
-    folder_name = f"microdrop-plugins-update-{date}-{platform}"
+    folder_name = f"microdrop-update-{date}-{platform}"
     folder = DIST / "share" / folder_name
 
     if folder.exists():
@@ -597,4 +597,4 @@ if __name__ == "__main__":
     parser.add_argument("--lock", type=Path, help="pixi.lock with the target versions")
     args = parser.parse_args()
 
-    build_plugin_update(args.platform, args.environment, args.base, args.lock)
+    build_update(args.platform, args.environment, args.base, args.lock)

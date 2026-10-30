@@ -12,7 +12,7 @@
 
 The pack pipeline leaves several GB behind: the full and slim packs, the
 injected wheels, and the unzipped hand-off folders. Only the hand-off zips
-are worth keeping (and the plugin update zips), plus the download cache
+are worth keeping (and the update bundle zips), plus the download cache
 that makes the next pack fast.
 
 Usage: python tools/clean_dist.py [dist_dir]
@@ -25,9 +25,9 @@ from pathlib import Path
 
 DIST = Path(__file__).parent.parent / "dist"
 
-#: What survives a clean: the hand-off and plugin update zips, and the
+#: What survives a clean: the hand-off and update bundle zips, and the
 #: pixi-pack download cache.
-KEEP_GLOBS = ("share-microdrop-*.zip", "microdrop-plugins-update-*.zip")
+KEEP_GLOBS = ("share-microdrop-*.zip", "microdrop-update-*.zip")
 KEEP_DIRS = {"pack-cache"}
 
 

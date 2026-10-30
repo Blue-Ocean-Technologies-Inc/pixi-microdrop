@@ -225,12 +225,12 @@ pack-prod-slim = { cmd = "python tools/prune_pack.py dist/microdrop-{{ environme
 share-prod = { cmd = "python tools/build_share.py {{ platform }} {{ environment }}", args = ["platform", { arg = "environment", default = "prod" }], depends-on = [{ task = "pack-prod-slim", args = ["{{ platform }}", "{{ environment }}"] }] }
 # Newer plugins for an existing hand-off install, without a reinstall: the
 # plugin packages pinned in pixi.lock plus the dependencies the customer's
-# pack lacks, as a local conda channel + micromamba + update-plugins.bat from
-# tools/share-update/ — see tools/build_plugin_update.py. Bump the plugin pins
+# pack lacks, as a local conda channel + micromamba + apply-update.bat from
+# tools/share-update/ — see tools/build_update.py. Bump the plugin pins
 # and relock first. The base defaults to the newest prod pack in dist/; for
-# another one: `pixi run python tools/build_plugin_update.py win-64 prod --base <pack.tar|share zip>`.
-# Usage: `pixi run share-plugin-update` -> dist/microdrop-plugins-update-<date>-win-64.zip
-share-plugin-update = { cmd = "python tools/build_plugin_update.py {{ platform }} {{ environment }}", args = [{ arg = "platform", default = "win-64" }, { arg = "environment", default = "prod" }] }
+# another one: `pixi run python tools/build_update.py win-64 prod --base <pack.tar|share zip>`.
+# Usage: `pixi run share-update` -> dist/microdrop-update-<date>-win-64.zip
+share-update = { cmd = "python tools/build_update.py {{ platform }} {{ environment }}", args = [{ arg = "platform", default = "win-64" }, { arg = "environment", default = "prod" }] }
 # Both hand-off zips in one go: `pixi run share-prod-all` (win-64 by default).
 share-prod-all = { args = [{ arg = "platform", default = "win-64" }], depends-on = [{ task = "share-prod", args = ["{{ platform }}", "prod"] }, { task = "share-prod", args = ["{{ platform }}", "prod-no-ai"] }] }
 # The git hand-off, for a user who cannot fetch conda packages but can use

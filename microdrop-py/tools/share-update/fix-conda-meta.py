@@ -13,7 +13,7 @@
 pixi-unpack writes every ``conda-meta/*.json`` record with ``"channel":
 null``; micromamba refuses to read such a record. The channel is set to the
 one the package was installed from, the package URL minus its subdir and
-file name. update-plugins.bat runs this with the environment's own Python,
+file name. apply-update.bat runs this with the environment's own Python,
 so it is standard library only.
 
 Usage: python fix-conda-meta.py <env>/conda-meta

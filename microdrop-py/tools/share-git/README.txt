@@ -36,8 +36,8 @@ fail to start with a "No module named ..." error. Get a new copy of this
 download in that case - the updates themselves never need one otherwise.
 
 Newer plugins (heater, magnet, fluorescence) come as a separate, small
-microdrop-plugins-update zip: unzip it inside this folder and run its
-update-plugins.bat - see the README.txt in it.
+microdrop-update zip: unzip it inside this folder and run its
+apply-update.bat - see the README.txt in it.
 
 
 Troubleshooting

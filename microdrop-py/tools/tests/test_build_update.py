@@ -17,7 +17,7 @@ import tarfile
 import zipfile
 
 # Third-party imports.
-import build_plugin_update as bpu
+import build_update as bu
 import pytest
 import yaml
 
@@ -156,13 +156,13 @@ def lock_path(tmp_path):
 @pytest.fixture
 def base_packages():
     return {
-        name: bpu.Package(name, version, build, subdir)
+        name: bu.Package(name, version, build, subdir)
         for name, (version, build, subdir) in BASE.items()
     }
 
 
 def test_package_from_url_reads_name_version_build_and_subdir():
-    package = bpu.package_from_url(
+    package = bu.package_from_url(
         f"{PLUGINS}/noarch/heater-microdrop-plugin-1.12.0-pyh4616a5c_0.conda"
     )
 
@@ -171,15 +171,15 @@ def test_package_from_url_reads_name_version_build_and_subdir():
     assert package.build == "pyh4616a5c_0"
     assert package.subdir == "noarch"
 
-    legacy = bpu.package_from_url(f"{CF}/noarch/mpremote-1.25.0-py_0.tar.bz2")
+    legacy = bu.package_from_url(f"{CF}/noarch/mpremote-1.25.0-py_0.tar.bz2")
 
     assert (legacy.name, legacy.version, legacy.build) == ("mpremote", "1.25.0", "py_0")
 
 
 def test_read_lock_packages_reads_one_environment_and_platform(lock_path):
-    packages = bpu.read_lock_packages(lock_path, "prod", "win-64")
+    packages = bu.read_lock_packages(lock_path, "prod", "win-64")
 
-    assert set(packages) == {bpu.package_from_url(url).name for url in TARGET}
+    assert set(packages) == {bu.package_from_url(url).name for url in TARGET}
 
     python = packages["python"]
 
@@ -190,13 +190,13 @@ def test_read_lock_packages_reads_one_environment_and_platform(lock_path):
 
 
 def test_read_lock_packages_maps_a_named_platform_to_its_subdir(lock_path):
-    packages = bpu.read_lock_packages(lock_path, "prod", "linux-aarch64")
+    packages = bu.read_lock_packages(lock_path, "prod", "linux-aarch64")
 
     assert list(packages) == ["zlib"]
 
 
 def test_read_plugin_names_takes_the_plugin_features(lock_path):
-    names = bpu.read_plugin_names(lock_path.with_name("pyproject.toml"))
+    names = bu.read_plugin_names(lock_path.with_name("pyproject.toml"))
 
     assert names == ["heater-microdrop-plugin", "magnet-microdrop-plugin"]
 
@@ -204,7 +204,7 @@ def test_read_plugin_names_takes_the_plugin_features(lock_path):
 def test_read_base_from_a_pack(tmp_path, base_packages):
     pack_path = write_pack(tmp_path / "microdrop-prod-slim-win-64.tar")
 
-    packages, identity = bpu.read_base(pack_path, "prod", "win-64")
+    packages, identity = bu.read_base(pack_path, "prod", "win-64")
 
     assert packages == base_packages
     assert identity == {
@@ -224,7 +224,7 @@ def test_read_base_from_a_hand_off_zip(tmp_path, base_packages):
         archive.write(pack_path, f"share-microdrop/{pack_path.name}")
         archive.writestr("share-microdrop/install.bat", "@echo off")
 
-    packages, identity = bpu.read_base(zip_path, "prod", "win-64")
+    packages, identity = bu.read_base(zip_path, "prod", "win-64")
 
     assert packages == base_packages
     assert identity["kind"] == "hand-off zip"
@@ -242,35 +242,35 @@ def test_read_base_from_an_install_folder(tmp_path, base_packages):
 
     (conda_meta / "history").write_text("")
 
-    packages, identity = bpu.read_base(tmp_path / "MicroDrop", "prod", "win-64")
+    packages, identity = bu.read_base(tmp_path / "MicroDrop", "prod", "win-64")
 
     assert packages == base_packages
     assert identity["kind"] == "install"
 
 
 def test_read_base_from_a_lock(lock_path):
-    packages, identity = bpu.read_base(lock_path, "prod", "win-64")
+    packages, identity = bu.read_base(lock_path, "prod", "win-64")
 
     assert "heater-microdrop-plugin" in packages
     assert identity == {"source": "pixi.lock", "kind": "lock"}
 
 
 def select(lock_path, base_packages):
-    target = bpu.read_lock_packages(lock_path, "prod", "win-64")
+    target = bu.read_lock_packages(lock_path, "prod", "win-64")
     plugins = ["heater-microdrop-plugin", "magnet-microdrop-plugin"]
-    install = bpu.select_install_names(target, base_packages, plugins)
+    install = bu.select_install_names(target, base_packages, plugins)
 
     return {
         package.name: package
-        for package in bpu.select_update_packages(target, base_packages, install)
+        for package in bu.select_update_packages(target, base_packages, install)
     }
 
 
 def test_select_install_names_adds_packages_new_to_the_base(lock_path, base_packages):
-    target = bpu.read_lock_packages(lock_path, "prod", "win-64")
+    target = bu.read_lock_packages(lock_path, "prod", "win-64")
     plugins = ["heater-microdrop-plugin", "magnet-microdrop-plugin"]
 
-    names = bpu.select_install_names(target, base_packages, plugins)
+    names = bu.select_install_names(target, base_packages, plugins)
 
     # The plugins, plus every package the base lacks by name - except the
     # toolchain a slim pack strips (clang). Changed numpy is not installed.
@@ -319,7 +319,7 @@ def test_select_ships_new_and_changed_dependencies_only(lock_path, base_packages
 
 
 def test_select_ships_a_dependency_whose_version_changed(lock_path, base_packages):
-    base_packages["python"] = bpu.Package("python", "3.13.14", "h_0", "win-64")
+    base_packages["python"] = bu.Package("python", "3.13.14", "h_0", "win-64")
 
     selected = select(lock_path, base_packages)
 
@@ -331,7 +331,7 @@ def test_select_ships_a_dependency_whose_version_changed(lock_path, base_package
 
 
 def test_select_keeps_platform_and_noarch_subdirs(lock_path, base_packages):
-    base_packages["python"] = bpu.Package("python", "3.13.14", "h_0", "win-64")
+    base_packages["python"] = bu.Package("python", "3.13.14", "h_0", "win-64")
 
     selected = select(lock_path, base_packages)
 
@@ -344,10 +344,10 @@ def test_select_leaves_out_toolchain_packages_a_slim_base_stripped(
     lock_path, base_packages
 ):
     base_packages.pop("python")
-    target = bpu.read_lock_packages(lock_path, "prod", "win-64")
+    target = bu.read_lock_packages(lock_path, "prod", "win-64")
     target["python"] = target["python"]._replace(depends=("clang",))
 
-    selected = bpu.select_update_packages(
+    selected = bu.select_update_packages(
         target, base_packages, ["heater-microdrop-plugin"]
     )
     names = [package.name for package in selected]
@@ -357,25 +357,25 @@ def test_select_leaves_out_toolchain_packages_a_slim_base_stripped(
 
 
 def test_select_fails_when_the_lock_lacks_a_plugin(lock_path, base_packages):
-    target = bpu.read_lock_packages(lock_path, "prod", "win-64")
+    target = bu.read_lock_packages(lock_path, "prod", "win-64")
 
     with pytest.raises(SystemExit, match="fluorescence-microdrop-plugin"):
-        bpu.select_install_names(
+        bu.select_install_names(
             target, base_packages, ["fluorescence-microdrop-plugin"]
         )
 
 
 def test_write_manifest_writes_specs_and_base_plugins(tmp_path, lock_path):
-    target = bpu.read_lock_packages(lock_path, "prod", "win-64")
+    target = bu.read_lock_packages(lock_path, "prod", "win-64")
     base = {
-        name: bpu.Package(name, version, build, subdir)
+        name: bu.Package(name, version, build, subdir)
         for name, (version, build, subdir) in BASE.items()
     }
     plugin_names = ["heater-microdrop-plugin", "magnet-microdrop-plugin"]
     install = [target[name] for name in plugin_names + ["sympy"]]
     channel = [target["heater-microdrop-plugin"], target["sympy"]]
 
-    manifest = bpu.build_manifest(
+    manifest = bu.build_manifest(
         "2026-10-29",
         "win-64",
         "prod",
@@ -385,7 +385,7 @@ def test_write_manifest_writes_specs_and_base_plugins(tmp_path, lock_path):
         install,
         channel,
     )
-    bpu.write_manifest(tmp_path, manifest)
+    bu.write_manifest(tmp_path, manifest)
 
     assert manifest["plugins"] == [
         "heater-microdrop-plugin=1.12.0=pyh4616a5c_0",
@@ -410,7 +410,7 @@ def test_write_manifest_writes_specs_and_base_plugins(tmp_path, lock_path):
     )
 
 
-def test_build_plugin_update_smoke(tmp_path, monkeypatch, lock_path):
+def test_build_update_smoke(tmp_path, monkeypatch, lock_path):
     dist = tmp_path / "dist"
     pack_path = write_pack(tmp_path / "microdrop-prod-slim-win-64.tar")
     downloads = []
@@ -421,14 +421,14 @@ def test_build_plugin_update_smoke(tmp_path, monkeypatch, lock_path):
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(archive_bytes(url))
 
-    monkeypatch.setattr(bpu, "DIST", dist)
-    monkeypatch.setattr(bpu, "download", fake_download)
-    monkeypatch.setattr(bpu.subprocess, "run", lambda *a, **k: commands.append(a))
+    monkeypatch.setattr(bu, "DIST", dist)
+    monkeypatch.setattr(bu, "download", fake_download)
+    monkeypatch.setattr(bu.subprocess, "run", lambda *a, **k: commands.append(a))
 
-    zip_path = bpu.build_plugin_update("win-64", "prod", pack_path, lock_path)
+    zip_path = bu.build_update("win-64", "prod", pack_path, lock_path)
 
     date = datetime.date.today().isoformat()
-    folder_name = f"microdrop-plugins-update-{date}-win-64"
+    folder_name = f"microdrop-update-{date}-win-64"
     folder = dist / "share" / folder_name
 
     assert zip_path == dist / f"{folder_name}.zip"
@@ -449,7 +449,7 @@ def test_build_plugin_update_smoke(tmp_path, monkeypatch, lock_path):
         "noarch/sympy-1.14.0-pyh2585a3b_105.conda",
         "win-64/repodata.json",
     ]
-    assert commands[0][0][:4] == ["pixi", "exec", "--spec", bpu.RATTLER_INDEX_SPEC]
+    assert commands[0][0][:4] == ["pixi", "exec", "--spec", bu.RATTLER_INDEX_SPEC]
 
     # Downloads land in the pack-cache layout; micromamba is fetched once.
     assert (
@@ -465,7 +465,7 @@ def test_build_plugin_update_smoke(tmp_path, monkeypatch, lock_path):
     assert "send2trash=1.8.3=pyh5737063_1" in manifest["install"]
 
     for name in (
-        "update-plugins.bat",
+        "apply-update.bat",
         "fix-conda-meta.py",
         "README.txt",
         "specs.txt",
@@ -473,17 +473,17 @@ def test_build_plugin_update_smoke(tmp_path, monkeypatch, lock_path):
     ):
         assert (folder / name).exists()
 
-    assert b"\r\n" in (folder / "update-plugins.bat").read_bytes()
+    assert b"\r\n" in (folder / "apply-update.bat").read_bytes()
     assert b"heater-microdrop-plugin=1.12.0" in (folder / "README.txt").read_bytes()
 
     with zipfile.ZipFile(zip_path) as archive:
         names = archive.namelist()
 
-    assert f"{folder_name}/update-plugins.bat" in names
+    assert f"{folder_name}/apply-update.bat" in names
     assert f"{folder_name}/channel/noarch/sympy-1.14.0-pyh2585a3b_105.conda" in names
 
     # A second build reuses the verified cache instead of downloading again.
     downloads.clear()
-    bpu.build_plugin_update("win-64", "prod", pack_path, lock_path)
+    bu.build_update("win-64", "prod", pack_path, lock_path)
 
     assert downloads == []
