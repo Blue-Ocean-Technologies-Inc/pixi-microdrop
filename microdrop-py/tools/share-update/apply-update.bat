@@ -8,6 +8,9 @@ rem against the local channel and the packages the install already has, then
 rem the install's own pip installs the PyPI wheels; nothing is downloaded.
 rem MicroDrop's own wheel is skipped for a git install (MicroDrop linked from
 rem its clone in ..\microdrop), which update-microdrop.bat updates instead.
+rem It asks for the MicroDrop folder, offering one found next to it; pass the
+rem folder as the first argument to skip the question:
+rem   apply-update.bat "C:\MicroDrop"
 rem Set MICRODROP_UPDATE_NOPAUSE=1 to run it unattended (no pause at the end).
 
 rem Work from this script's folder, wherever it was double-clicked from.
@@ -16,13 +19,18 @@ set "HERE=%~dp0"
 
 for %%F in (micromamba.exe fix-conda-meta.py specs.txt optional-specs.txt plugins.txt pypi-specs.txt microdrop-spec.txt channel\noarch\repodata.json) do if not exist "%%F" goto :incomplete
 
-rem Find the install: this folder unzipped inside the MicroDrop folder (the
-rem expected case), the MicroDrop folder itself, or ask for it.
-set "MD_DIR="
-if exist "..\env\python.exe" for %%D in ("%CD%\..") do set "MD_DIR=%%~fD"
-if not defined MD_DIR if exist "env\python.exe" set "MD_DIR=%CD%"
+rem The install to offer: this folder unzipped inside the MicroDrop folder,
+rem the MicroDrop folder itself, or this folder inside the one named after
+rem the zip that Explorer's "Extract All" adds.
+set "FOUND_DIR="
+if exist "..\env\python.exe" for %%D in ("%CD%\..") do set "FOUND_DIR=%%~fD"
+if not defined FOUND_DIR if exist "env\python.exe" set "FOUND_DIR=%CD%"
+if not defined FOUND_DIR if exist "..\..\env\python.exe" for %%D in ("%CD%\..\..") do set "FOUND_DIR=%%~fD"
+
+set "MD_DIR=%~1"
 if not defined MD_DIR call :ask_folder
-if not defined MD_DIR goto :fail
+if not defined MD_DIR goto :no_folder
+for %%D in ("%MD_DIR%") do set "MD_DIR=%%~fD"
 
 set "ENV_DIR=%MD_DIR%\env"
 if not exist "%ENV_DIR%\python.exe" if exist "%MD_DIR%\conda-meta" set "ENV_DIR=%MD_DIR%"
@@ -130,11 +138,20 @@ echo it (that needs internet).
 goto :eof
 
 :ask_folder
-echo Could not find MicroDrop next to this folder. Unzip the update inside
-echo your MicroDrop folder - the one with install.bat and the env folder -
-echo or type the path of that folder below.
+echo Enter the path of your MicroDrop folder - the one with install.bat and
+echo the env folder - and press Enter.
+if not defined FOUND_DIR goto :ask_folder_blank
+echo Just press Enter to update the one found here, shown in brackets.
+echo.
+set "MD_DIR=%FOUND_DIR%"
+set /p "MD_DIR=MicroDrop folder [%FOUND_DIR%]: "
+goto :ask_folder_unquote
+
+:ask_folder_blank
 echo.
 set /p "MD_DIR=MicroDrop folder: "
+
+:ask_folder_unquote
 if not defined MD_DIR goto :eof
 set "MD_DIR=%MD_DIR:"=%"
 goto :eof
@@ -150,11 +167,16 @@ goto :eof
 echo ERROR: this folder is incomplete. Unzip the whole update download again.
 goto :fail
 
+:no_folder
+echo ERROR: no MicroDrop folder given. Run this again and enter the folder
+echo that holds install.bat and the env folder.
+goto :fail
+
 :no_install
 echo ERROR: no MicroDrop install found in
 echo   %MD_DIR%
-echo (env\python.exe is missing). Unzip the update inside your MicroDrop
-echo folder, next to its env folder, and run this again.
+echo (env\python.exe is missing). Run this again and enter the folder that
+echo holds install.bat and the env folder.
 goto :fail
 
 :running

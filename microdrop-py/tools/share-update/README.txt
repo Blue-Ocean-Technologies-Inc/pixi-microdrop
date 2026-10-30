@@ -12,19 +12,26 @@ It installs {count} packages, including these plugins:
 {microdrop}
 
 
-1. Unzip this download INSIDE your MicroDrop folder - the folder with
-   install.bat, run-microdrop.bat and the env folder - so that it holds a
-   new {folder_name} folder next to env.
+1. Unzip this download anywhere (a short path such as C:\mdupdate avoids
+   Windows' long-path limit). It holds one {folder_name} folder; Windows'
+   "Extract All" may put it inside a folder named after the zip, which is
+   fine.
 
 2. Close MicroDrop.
 
-3. Open the {folder_name} folder and double-click
-   apply-update.bat   (takes a few minutes).
+3. Open the {folder_name} folder, double-click apply-update.bat and enter
+   your MicroDrop folder (the one with the env folder) when asked, e.g.
+   C:\MicroDrop - or just press Enter if it already shows the right one.
+   The update takes a few minutes.
 
 4. Start MicroDrop again as usual.
 
-If apply-update.bat cannot find MicroDrop next to it, it asks for the
-MicroDrop folder: type or paste its path (e.g. C:\MicroDrop) and press Enter.
+If Windows says the path is too long while unzipping, extract the zip to a
+short folder such as C:\mdupdate instead and run apply-update.bat from
+there.
+
+To skip the question, pass the folder to the script from a command prompt:
+    apply-update.bat "C:\MicroDrop"
 
 
 Going back
@@ -47,7 +54,7 @@ Troubleshooting
 
 Files
 -----
-apply-update.bat    installs the update into ..\env
+apply-update.bat    installs the update into your MicroDrop's env folder
 channel\            the updated packages
 wheels\             the updated Python (PyPI) packages, installed after them
 micromamba.exe      package installer used by apply-update.bat
