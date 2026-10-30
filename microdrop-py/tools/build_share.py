@@ -105,6 +105,12 @@ def read_pack_info(pack_path):
     return pixi_pack_version, microdrop_version, has_ai
 
 
+def handoff_variant(has_ai):
+    """The variant suffix a hand-off zip's name carries for its AI stack."""
+
+    return "AI-support" if has_ai else "no-AI"
+
+
 def fetch_pixi_unpack(version):
     """Return a cached pixi-unpack.exe matching the pack's pixi-pack version."""
 
@@ -173,7 +179,7 @@ def build_share(platform, environment):
     pixi_pack_version, microdrop_version, has_ai = read_pack_info(pack_path)
 
     folder_name = "share-microdrop" if has_ai else "share-microdrop-no-ai"
-    variant = "AI-support" if has_ai else "no-AI"
+    variant = handoff_variant(has_ai)
     folder = DIST / "share" / folder_name
 
     if folder.exists():

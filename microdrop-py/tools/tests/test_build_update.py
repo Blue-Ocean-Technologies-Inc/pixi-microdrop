@@ -581,7 +581,7 @@ def test_default_bases_takes_the_environments_slim_packs_and_hand_off_zips(
         "share-microdrop-1.23.0-win-64-no-AI.zip",
         "share-microdrop-git-v1.24.2-8-g684be6ba-win-64.zip",
         "share-microdrop-1.23.0-linux-64.zip",
-        "microdrop-update-2026-10-30-win-64.zip",
+        "microdrop-update-2026-10-30-win-64-AI-support.zip",
     ):
         (tmp_path / name).write_text("")
 
@@ -687,7 +687,9 @@ def fake_dist(tmp_path, monkeypatch):
 
 
 def bundle_folder(dist):
-    return dist / "share" / f"microdrop-update-{datetime.date.today()}-win-64"
+    return (
+        dist / "share" / f"microdrop-update-{datetime.date.today()}-win-64-AI-support"
+    )
 
 
 def bundle_files(dist, subfolder):
@@ -765,6 +767,8 @@ def test_build_update_smoke(tmp_path, fake_dist, lock_path):
 
     readme = (folder / "README.txt").read_bytes()
 
+    assert f"MicroDrop update {datetime.date.today()} (AI-support)".encode() in readme
+    assert folder_name.encode() in readme
     assert b"It installs 8 packages" in readme
     assert b"heater-microdrop-plugin=1.12.0" in readme
     assert b"MicroDrop itself is updated to 1.33.0" in readme

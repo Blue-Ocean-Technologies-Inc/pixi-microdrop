@@ -233,7 +233,8 @@ share-prod = { cmd = "python tools/build_share.py {{ platform }} {{ environment 
 # (repeatable), or ship the
 # whole environment for an unknown base with --full:
 # `pixi run python tools/build_update.py win-64 prod --base <pack.tar|share zip|install>`.
-# Usage: `pixi run share-update` -> dist/microdrop-update-<date>-win-64.zip
+# Usage: `pixi run share-update` -> dist/microdrop-update-<date>-win-64-AI-support.zip
+#        `pixi run share-update win-64 prod-no-ai` -> dist/microdrop-update-<date>-win-64-no-AI.zip
 share-update = { cmd = "python tools/build_update.py {{ platform }} {{ environment }}", args = [{ arg = "platform", default = "win-64" }, { arg = "environment", default = "prod" }] }
 # Both hand-off zips in one go: `pixi run share-prod-all` (win-64 by default).
 share-prod-all = { args = [{ arg = "platform", default = "win-64" }], depends-on = [{ task = "share-prod", args = ["{{ platform }}", "prod"] }, { task = "share-prod", args = ["{{ platform }}", "prod-no-ai"] }] }

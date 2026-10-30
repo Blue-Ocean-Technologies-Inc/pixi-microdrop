@@ -63,6 +63,7 @@ from build_share import (
     DIST,
     HANDOFF_PLATFORM,
     download,
+    handoff_variant,
     write_windows_text,
 )
 from prune_pack import STRIPPED_PACKAGE_REGEX
@@ -908,8 +909,11 @@ def build_update(platform, environment, base_paths=(), lock_path=None, full=Fals
             f"toolchain packages stripped from slim installs"
         )
 
+    # Named for the hand-off it updates, so the AI and no-AI bundles built
+    # the same day do not overwrite each other.
+    variant = handoff_variant("no-ai" not in environment)
     date = datetime.date.today().isoformat()
-    folder_name = f"microdrop-update-{date}-{platform}"
+    folder_name = f"microdrop-update-{date}-{platform}-{variant}"
     folder = DIST / "share" / folder_name
 
     if folder.exists():
@@ -957,7 +961,7 @@ def build_update(platform, environment, base_paths=(), lock_path=None, full=Fals
     for script in SCRIPTS:
         write_windows_text(folder / script, (TEMPLATES / script).read_text())
 
-    title = f"MicroDrop update {date}"
+    title = f"MicroDrop update {date} ({variant})"
     readme = (
         (TEMPLATES / "README.txt")
         .read_text()
