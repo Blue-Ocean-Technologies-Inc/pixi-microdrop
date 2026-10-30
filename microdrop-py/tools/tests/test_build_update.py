@@ -603,6 +603,31 @@ def test_default_bases_takes_the_environments_slim_packs_and_hand_off_zips(
     ]
 
 
+def test_bundle_name_follows_a_single_hand_off_zip():
+    git_zip = Path("share-microdrop-git-v1.24.2-8-g684be6ba-win-64.zip")
+    no_ai_zip = Path("share-microdrop-1.23.0-win-64-no-AI.zip")
+
+    assert bu.bundle_name("2026-10-30", "win-64", "prod", [git_zip]) == (
+        "microdrop-update-2026-10-30-for-git-v1.24.2-8-g684be6ba-win-64",
+        git_zip.name,
+    )
+    assert bu.bundle_name("2026-10-30", "win-64", "prod-no-ai", [no_ai_zip]) == (
+        "microdrop-update-2026-10-30-for-1.23.0-win-64-no-AI",
+        no_ai_zip.name,
+    )
+
+    # Several bases, a pack, or none (--full): the platform and AI variant.
+    for bases in ([git_zip, no_ai_zip], [Path("microdrop-prod-slim-win-64.tar")], []):
+        assert bu.bundle_name("2026-10-30", "win-64", "prod", bases) == (
+            "microdrop-update-2026-10-30-win-64-AI-support",
+            "win-64 AI-support",
+        )
+
+    assert bu.bundle_name("2026-10-30", "win-64", "prod-no-ai", [])[0] == (
+        "microdrop-update-2026-10-30-win-64-no-AI"
+    )
+
+
 def test_write_manifest_writes_the_spec_lists(tmp_path, lock_path):
     target = bu.read_lock_packages(lock_path, "prod", "win-64")
     target_pypi = built_target_pypi(lock_path)
@@ -767,7 +792,9 @@ def test_build_update_smoke(tmp_path, fake_dist, lock_path):
 
     readme = (folder / "README.txt").read_bytes()
 
-    assert f"MicroDrop update {datetime.date.today()} (AI-support)".encode() in readme
+    title = f"MicroDrop update {datetime.date.today()} for win-64 AI-support"
+
+    assert title.encode() in readme
     assert folder_name.encode() in readme
     assert b"It installs 8 packages" in readme
     assert b"heater-microdrop-plugin=1.12.0" in readme

@@ -842,6 +842,29 @@ def describe_microdrop(pypi):
     return f"MicroDrop itself is updated to {versions[0]}.\n{git_note}"
 
 
+def bundle_name(date, platform, environment, base_paths):
+    """Name the bundle for the hand-off it updates.
+
+    Bundles built the same day must not overwrite each other: one built for
+    a single hand-off zip is named after it (the AI, no-AI and git hand-offs
+    are all distinct), any other after the platform and AI variant.
+
+    Returns
+    -------
+    tuple
+        (bundle folder name, the hand-off as the README names it)
+    """
+
+    if len(base_paths) == 1 and base_paths[0].suffix == ".zip":
+        handoff = base_paths[0].stem.removeprefix("share-microdrop-")
+
+        return f"microdrop-update-{date}-for-{handoff}", base_paths[0].name
+
+    variant = handoff_variant("no-ai" not in environment)
+
+    return f"microdrop-update-{date}-{platform}-{variant}", f"{platform} {variant}"
+
+
 def build_update(platform, environment, base_paths=(), lock_path=None, full=False):
     if platform != HANDOFF_PLATFORM:
         raise SystemExit(
@@ -909,11 +932,8 @@ def build_update(platform, environment, base_paths=(), lock_path=None, full=Fals
             f"toolchain packages stripped from slim installs"
         )
 
-    # Named for the hand-off it updates, so the AI and no-AI bundles built
-    # the same day do not overwrite each other.
-    variant = handoff_variant("no-ai" not in environment)
     date = datetime.date.today().isoformat()
-    folder_name = f"microdrop-update-{date}-{platform}-{variant}"
+    folder_name, handoff = bundle_name(date, platform, environment, base_paths)
     folder = DIST / "share" / folder_name
 
     if folder.exists():
@@ -961,7 +981,7 @@ def build_update(platform, environment, base_paths=(), lock_path=None, full=Fals
     for script in SCRIPTS:
         write_windows_text(folder / script, (TEMPLATES / script).read_text())
 
-    title = f"MicroDrop update {date} ({variant})"
+    title = f"MicroDrop update {date} for {handoff}"
     readme = (
         (TEMPLATES / "README.txt")
         .read_text()
