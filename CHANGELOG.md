@@ -1,3 +1,25 @@
+## [v0.8.0](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.8.0) (2026-10-30)
+
+### Feat
+
+- **tools**: apply-update.bat asks for the MicroDrop folder ([`bdc0416`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/bdc041602d1f6cd2908fbbc2d342f0e6edcf7ed9))
+- **tools**: ship changed PyPI wheels in the update ([`1800d3a`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/1800d3aed741ec0b9d15560357e0dab82c85350e))
+- **tools**: update every changed package from several bases ([`4747cfe`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/4747cfe73ce9ef823f175663db00c3aafc4fb7a2))
+- **tools**: offline plugin update bundle for packed installs ([`6de42ed`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/6de42ed9a0c58cf1b08e1e391cea118b355f4d26))
+
+### Fix
+
+- **tools**: keep micromamba's cache out of the update folder ([`2a5d51b`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/2a5d51b8a58af49e5a02d6375db2809d306cefda))
+- **tools**: keep update bundle paths under MAX_PATH ([`80f598a`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/80f598ace6028baf24881584865f64cee7458e82))
+- **tools**: name a bundle after its single hand-off ([`026f8d2`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/026f8d25029d13705b326b36ab540d5e3cd2f2d3))
+- **tools**: name update bundles by hand-off variant ([`e9211b2`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/e9211b2f958046b2c657418b6b1dfb29c542206b))
+- **tools**: match default update bases to the AI variant ([`a47259a`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/a47259a4fb8eeeda8f18d2b85d121e40c6c566ab))
+- **tools**: hold back packages needing the stripped toolchain ([`9287f77`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/9287f772a51813a3ad41b35c0ee86ade2f5f2752))
+
+### Refactor
+
+- **tools**: rename the plugin update to microdrop update ([`3d6f981`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/3d6f9810e662d94dabd44f491a6722d743000715))
+
 ## [v0.7.0](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.7.0) (2026-09-30)
 
 ### Feat
