@@ -51,8 +51,13 @@ call :show_plugins
 rem The packages to install: every spec in specs.txt, plus the build
 rem toolchain packages in optional-specs.txt (git, clang) only where the
 rem install already has them - slim installs leave them out on purpose.
-if not exist "%HERE%mamba-root" mkdir "%HERE%mamba-root"
-set "INSTALL_SPECS=%HERE%mamba-root\install-specs.txt"
+rem They go in micromamba's root prefix, which holds its package cache:
+rem outside this folder, whose path may already be deep (or synced by
+rem OneDrive), since the cache nests each package's files much deeper.
+set "MAMBA_ROOT=%LOCALAPPDATA%\MicroDrop\update-root"
+if not defined LOCALAPPDATA set "MAMBA_ROOT=%TEMP%\microdrop-update-root"
+if not exist "%MAMBA_ROOT%" mkdir "%MAMBA_ROOT%"
+set "INSTALL_SPECS=%MAMBA_ROOT%\install-specs.txt"
 copy /y "%HERE%specs.txt" "%INSTALL_SPECS%" >nul
 for /f "usebackq tokens=1* delims==" %%N in ("%HERE%optional-specs.txt") do if exist "%ENV_DIR%\conda-meta\%%N-*.json" >>"%INSTALL_SPECS%" echo %%N=%%O
 set "COUNT=0"
@@ -74,12 +79,11 @@ rem (C:\Users\John Doe\...), so hand it the 8.3 short forms, which have
 rem none. A volume without short names returns the long path unchanged.
 for %%I in ("%HERE%channel") do set "CHANNEL=%%~sI"
 for %%I in ("%ENV_DIR%") do set "PREFIX=%%~sI"
-for %%I in ("%HERE%mamba-root") do set "ROOT=%%~sI"
+for %%I in ("%MAMBA_ROOT%") do set "ROOT=%%~sI"
 set "PATHS=%CHANNEL%%PREFIX%%ROOT%"
 if not "%PATHS: =%"=="%PATHS%" call :warn_spaces
 
-rem --no-rc / --no-env: ignore any conda/mamba settings on this PC. The
-rem root prefix holds micromamba's package cache; keep it inside this folder.
+rem --no-rc / --no-env: ignore any conda/mamba settings on this PC.
 "%HERE%micromamba.exe" install --no-rc --no-env -r "%ROOT%" -p "%PREFIX%" --offline --override-channels -c "%CHANNEL%" -y -f "%ROOT%\install-specs.txt"
 if errorlevel 1 goto :install_failed
 
@@ -111,6 +115,7 @@ echo.
 echo Plugins installed now:
 call :show_plugins
 echo.
+rmdir /s /q "%MAMBA_ROOT%" 2>nul
 echo Done. Start MicroDrop again to use the update.
 
 echo.
@@ -192,7 +197,8 @@ echo ERROR: the update failed - see the messages above. MicroDrop may now be
 echo partly updated. To go back to the shipped versions, rerun install.bat
 echo from your MicroDrop download and answer Y to reinstall. If this install
 echo was not set up from a download this update was made for, ask for a full
-echo update instead.
+echo update instead. The installer's working files are left for diagnosis in
+echo   %MAMBA_ROOT%
 goto :fail
 
 :fail
