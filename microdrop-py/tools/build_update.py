@@ -36,7 +36,7 @@ Usage: python tools/build_update.py [platform] [environment]
 hand-off ``share-microdrop-*.zip`` holding one, a ``pixi.lock`` (read for the
 same environment), or an installed MicroDrop folder (its ``env/conda-meta``
 and ``site-packages``). It defaults to every slim pack and hand-off zip for
-the platform in ``dist/``.
+the platform in ``dist/`` that matches the environment's AI variant.
 """
 
 # Standard library imports.
@@ -438,20 +438,25 @@ def read_base(base_path, environment, platform):
     return packages, pypi, identity
 
 
-def default_bases(platform):
-    """Every pack a customer may have installed for the platform, in ``dist/``.
+def default_bases(environment, platform):
+    """Every pack a customer of the environment may have installed, in ``dist/``.
 
-    That is the slim packs and the hand-off zips (which hold slim packs):
-    full packs keep the firmware toolchain, which no customer install has.
+    That is the slim packs and the hand-off zips (which hold slim packs) for
+    the platform: full packs keep the firmware toolchain, which no customer
+    install has. A no-AI environment takes the no-AI builds, any other the
+    rest - a bundle built for the other kind would add or miss the AI stack.
     """
 
-    bases = sorted(DIST.glob(f"microdrop-*-slim-{platform}.tar"))
-    bases += sorted(DIST.glob(f"share-microdrop-*-{platform}*.zip"))
+    no_ai = "no-ai" in environment
+    candidates = sorted(DIST.glob(f"microdrop-*-slim-{platform}.tar"))
+    candidates += sorted(DIST.glob(f"share-microdrop-*-{platform}*.zip"))
+    bases = [path for path in candidates if ("no-ai" in path.name.lower()) == no_ai]
 
     if not bases:
         raise SystemExit(
-            f"no pack or hand-off zip for {platform} in {DIST} - pass --base with "
-            f"the pack (or hand-off zip) the customer installed, or --full"
+            f"no {environment} pack or hand-off zip for {platform} in {DIST} - "
+            f"pass --base with the pack (or hand-off zip) the customer installed, "
+            f"or --full"
         )
 
     return bases
@@ -849,7 +854,9 @@ def build_update(platform, environment, base_paths=(), lock_path=None, full=Fals
     target = read_lock_packages(lock_path, environment, platform)
     target_pypi = read_lock_pypi_packages(lock_path, environment, platform)
     plugin_names = read_plugin_names(lock_path.with_name("pyproject.toml"))
-    base_paths = [] if full else list(base_paths) or default_bases(platform)
+    base_paths = (
+        [] if full else list(base_paths) or default_bases(environment, platform)
+    )
     bases = []
 
     for base_path in base_paths:

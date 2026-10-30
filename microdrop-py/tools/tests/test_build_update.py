@@ -570,11 +570,14 @@ def test_build_path_wheel_returns_the_version_and_wheel(
     assert built.path == tmp_path / "wheels" / wheel_name
 
 
-def test_default_bases_takes_slim_packs_and_hand_off_zips(tmp_path, monkeypatch):
+def test_default_bases_takes_the_environments_slim_packs_and_hand_off_zips(
+    tmp_path, monkeypatch
+):
     for name in (
         "microdrop-prod-win-64.tar",
         "microdrop-prod-slim-win-64.tar",
         "microdrop-prod-no-ai-slim-win-64.tar",
+        "share-microdrop-1.23.0-win-64-AI-support.zip",
         "share-microdrop-1.23.0-win-64-no-AI.zip",
         "share-microdrop-git-v1.24.2-8-g684be6ba-win-64.zip",
         "share-microdrop-1.23.0-linux-64.zip",
@@ -584,13 +587,19 @@ def test_default_bases_takes_slim_packs_and_hand_off_zips(tmp_path, monkeypatch)
 
     monkeypatch.setattr(bu, "DIST", tmp_path)
 
-    names = [path.name for path in bu.default_bases("win-64")]
+    names = [path.name for path in bu.default_bases("prod", "win-64")]
+
+    assert names == [
+        "microdrop-prod-slim-win-64.tar",
+        "share-microdrop-1.23.0-win-64-AI-support.zip",
+        "share-microdrop-git-v1.24.2-8-g684be6ba-win-64.zip",
+    ]
+
+    names = [path.name for path in bu.default_bases("prod-no-ai", "win-64")]
 
     assert names == [
         "microdrop-prod-no-ai-slim-win-64.tar",
-        "microdrop-prod-slim-win-64.tar",
         "share-microdrop-1.23.0-win-64-no-AI.zip",
-        "share-microdrop-git-v1.24.2-8-g684be6ba-win-64.zip",
     ]
 
 

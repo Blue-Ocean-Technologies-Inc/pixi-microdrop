@@ -228,8 +228,9 @@ share-prod = { cmd = "python tools/build_share.py {{ platform }} {{ environment 
 # has at another version (MicroDrop's own wheel included, except for git
 # installs), as a local conda channel + micromamba + wheels + apply-update.bat
 # from tools/share-update/ — see tools/build_update.py. Relock first. The
-# bases default to every slim pack and hand-off zip in dist/ (the bundle
-# covers their union); name others with --base (repeatable), or ship the
+# bases default to every slim pack and hand-off zip in dist/ of the same AI
+# variant (the bundle covers their union); name others with --base
+# (repeatable), or ship the
 # whole environment for an unknown base with --full:
 # `pixi run python tools/build_update.py win-64 prod --base <pack.tar|share zip|install>`.
 # Usage: `pixi run share-update` -> dist/microdrop-update-<date>-win-64.zip
