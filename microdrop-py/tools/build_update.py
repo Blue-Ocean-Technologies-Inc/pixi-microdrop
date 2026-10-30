@@ -13,8 +13,9 @@
 A customer's hand-off install is a plain conda prefix (``env/``) unpacked
 from a pixi-pack, with no pixi, no conda and no channel access. This bundle
 brings it up to this workspace's locked environment without a reinstall: a
-small local conda channel, micromamba to install from it offline, and the
-apply-update.bat that drives micromamba.
+small local conda channel and micromamba to install from it offline, the
+changed PyPI wheels (MicroDrop's own among them) for the environment's pip,
+and the apply-update.bat that drives both.
 
 The target versions come from this workspace's ``pixi.lock`` (relock first);
 the bases are the packs customers installed. The bundle installs every
@@ -24,20 +25,27 @@ closure - nothing a base already has is shipped again. With several bases
 the bundle covers their union. ``--full`` ignores the bases and ships the
 whole locked environment, for an install whose base is unknown.
 
+A git hand-off links MicroDrop from its clone instead of the wheel; the
+bundle only ships the wheel for bases that have it, and apply-update.bat
+never installs it over a clone.
+
 Usage: python tools/build_update.py [platform] [environment]
                                     [--base PATH ...] [--full] [--lock PATH]
 
 ``--base`` (repeatable) is a customer's pack: a pixi-pack ``.tar``, a
 hand-off ``share-microdrop-*.zip`` holding one, a ``pixi.lock`` (read for the
-same environment), or an installed MicroDrop folder (its ``env/conda-meta``).
-It defaults to every slim pack and hand-off zip for the platform in ``dist/``.
+same environment), or an installed MicroDrop folder (its ``env/conda-meta``
+and ``site-packages``). It defaults to every slim pack and hand-off zip for
+the platform in ``dist/``.
 """
 
 # Standard library imports.
 import argparse
 import datetime
+import functools
 import hashlib
 import json
+import re
 import shutil
 import subprocess
 import tarfile
@@ -50,7 +58,13 @@ from pathlib import Path
 import yaml
 
 # Local imports.
-from build_share import DIST, HANDOFF_PLATFORM, download, write_windows_text
+from build_share import (
+    DIRTY_VERSION,
+    DIST,
+    HANDOFF_PLATFORM,
+    download,
+    write_windows_text,
+)
 from prune_pack import STRIPPED_PACKAGE_REGEX
 
 TOOLS = Path(__file__).parent
@@ -75,12 +89,27 @@ CONDA_SUFFIXES = (".conda", ".tar.bz2")
 
 SCRIPTS = ("apply-update.bat", "fix-conda-meta.py")
 
+#: The MicroDrop app's PyPI name. A git hand-off has no such wheel installed:
+#: it links the clone through ``MICRODROP_GIT_PTH`` in site-packages.
+MICRODROP_DIST = "microdrop-py"
+MICRODROP_GIT_PTH = "microdrop_git.pth"
+
+#: hatch-vcs's version when `src` has no git history to read a version from.
+FALLBACK_VERSION = "0.0.0"
+
 #: One conda package. ``url``, ``sha256`` and ``depends`` are only known for
 #: packages read from a lock.
 Package = namedtuple(
     "Package",
     "name version build subdir url sha256 depends",
     defaults=(None, None, ()),
+)
+
+#: One PyPI package of a lock, by normalized name. A wheel from an index has
+#: ``url`` and ``sha256``; a path dependency (a source tree built into a
+#: wheel here) has ``path``, and its ``version`` only once built.
+PypiPackage = namedtuple(
+    "PypiPackage", "name version url sha256 path", defaults=(None, None, None, None)
 )
 
 
@@ -116,17 +145,46 @@ def package_stem(package):
     return f"{package.name}-{package.version}-{package.build}"
 
 
-def read_lock_packages(lock_path, environment, platform):
-    """The conda packages a ``pixi.lock`` resolves for one environment.
+def normalize_name(name):
+    """The PEP 503 normalized form of a PyPI project name."""
+
+    return re.sub(r"[-_.]+", "-", name).lower()
+
+
+def distribution_name_version(filename):
+    """Normalized name and version of a wheel or ``.dist-info`` file name.
+
+    Both escape the name's dashes, so the first dash ends the name.
+    """
+
+    name, version = filename.removesuffix(".dist-info").split("-")[:2]
+
+    return normalize_name(name), version
+
+
+def pypi_spec(package):
+    """The exact ``name==version`` requirement of a PyPI package."""
+
+    return f"{package.name}=={package.version}"
+
+
+@functools.cache
+def load_lock(lock_path):
+    with open(lock_path, encoding="utf-8") as stream:
+        return yaml.load(stream, Loader=yaml.CSafeLoader)
+
+
+def read_lock_entries(lock_path, environment, platform):
+    """The package entries a ``pixi.lock`` resolves for one environment.
 
     Returns
     -------
-    dict
-        Package name -> Package, with URL, sha256 and dependencies.
+    tuple
+        (the environment's ``conda``/``pypi`` entries for the platform, the
+        lock's package records)
     """
 
-    with open(lock_path, encoding="utf-8") as stream:
-        lock = yaml.load(stream, Loader=yaml.CSafeLoader)
+    lock = load_lock(lock_path)
 
     # Lock platform entries are named; a custom name (e.g. `p1`) carries its
     # conda subdir separately.
@@ -140,11 +198,25 @@ def read_lock_packages(lock_path, environment, platform):
         raise SystemExit(f"{lock_path} has no {platform} platform")
 
     environment_packages = lock["environments"][environment]["packages"]
-    records = {entry["conda"]: entry for entry in lock["packages"] if "conda" in entry}
+
+    return environment_packages.get(platform_names[0], []), lock["packages"]
+
+
+def read_lock_packages(lock_path, environment, platform):
+    """The conda packages a ``pixi.lock`` resolves for one environment.
+
+    Returns
+    -------
+    dict
+        Package name -> Package, with URL, sha256 and dependencies.
+    """
+
+    entries, records = read_lock_entries(lock_path, environment, platform)
+    records = {record["conda"]: record for record in records if "conda" in record}
 
     packages = {}
 
-    for entry in environment_packages.get(platform_names[0], []):
+    for entry in entries:
         url = entry.get("conda")
 
         if url is None:
@@ -153,6 +225,42 @@ def read_lock_packages(lock_path, environment, platform):
         record = records[url]
         package = package_from_url(url, record.get("sha256"), record.get("depends", ()))
         packages[package.name] = package
+
+    return packages
+
+
+def read_lock_pypi_packages(lock_path, environment, platform):
+    """The PyPI packages a ``pixi.lock`` resolves for one environment.
+
+    Returns
+    -------
+    dict
+        Normalized name -> PypiPackage. Path dependencies have no version
+        and their ``path`` resolved against the lock's folder.
+    """
+
+    entries, records = read_lock_entries(lock_path, environment, platform)
+    records = {record["pypi"]: record for record in records if "pypi" in record}
+
+    packages = {}
+
+    for entry in entries:
+        location = entry.get("pypi")
+
+        if location is None:
+            continue
+
+        record = records[location]
+        name = normalize_name(record["name"])
+
+        if "://" in location:
+            package = PypiPackage(
+                name, record["version"], location, record.get("sha256")
+            )
+        else:
+            package = PypiPackage(name, path=(Path(lock_path).parent / location))
+
+        packages[name] = package
 
     return packages
 
@@ -182,10 +290,11 @@ def read_pack_packages(pack):
     Returns
     -------
     tuple
-        (Package name -> Package, identity dict)
+        (Package name -> Package, PyPI name -> version, identity dict)
     """
 
     packages = {}
+    pypi = {}
     identity = {"pixi_pack_version": None, "microdrop_version": None}
 
     for member in pack:
@@ -207,13 +316,16 @@ def read_pack_packages(pack):
                         record["subdir"],
                     )
 
-        elif filename.startswith("microdrop_py-"):
-            identity["microdrop_version"] = filename.split("-")[1]
+        elif member.name.startswith("pypi/") and filename.endswith(".whl"):
+            name, version = distribution_name_version(filename)
+            pypi[name] = version
 
     if not packages:
         raise SystemExit("the pack has no channel repodata - is it a pixi-pack?")
 
-    return packages, identity
+    identity["microdrop_version"] = pypi.get(MICRODROP_DIST)
+
+    return packages, pypi, identity
 
 
 def read_install_packages(conda_meta):
@@ -230,31 +342,71 @@ def read_install_packages(conda_meta):
     return packages
 
 
+def read_install_pypi_packages(env):
+    """The Python distributions installed in an environment, by their
+    ``.dist-info`` folders: PyPI name -> version.
+
+    Conda's Python packages have one too; that is harmless, as the lock never
+    lists a package both as conda and as PyPI.
+    """
+
+    site_packages = [
+        env / "Lib" / "site-packages",
+        *env.glob("lib/python*/site-packages"),
+    ]
+
+    return dict(
+        distribution_name_version(path.name)
+        for folder in site_packages
+        for path in folder.glob("*.dist-info")
+    )
+
+
 def read_base(base_path, environment, platform):
     """The package set the customer has installed, from their pack.
 
     Returns
     -------
     tuple
-        (Package name -> Package, identity dict recorded in the manifest)
+        (Package name -> Package, PyPI name -> version (None where a lock
+        does not know it), identity dict recorded in the manifest)
     """
 
     identity = {"source": base_path.name}
 
     if base_path.is_dir():
-        conda_meta = base_path / "env" / "conda-meta"
+        env = base_path / "env"
 
-        if not conda_meta.is_dir():
-            conda_meta = base_path / "conda-meta"
+        if not (env / "conda-meta").is_dir():
+            env = base_path
+
+        pypi = read_install_pypi_packages(env)
+        git_linked = any(
+            (folder / MICRODROP_GIT_PTH).exists()
+            for folder in (env / "Lib" / "site-packages", env)
+        )
+
+        # A clone linked in shadows any wheel; the update must not install one.
+        if git_linked:
+            pypi.pop(MICRODROP_DIST, None)
 
         identity["kind"] = "install"
+        identity["microdrop_version"] = (
+            "git" if git_linked else pypi.get(MICRODROP_DIST)
+        )
 
-        return read_install_packages(conda_meta), identity
+        return read_install_packages(env / "conda-meta"), pypi, identity
 
     if base_path.suffix == ".lock":
         identity["kind"] = "lock"
+        pypi = {
+            name: package.version
+            for name, package in read_lock_pypi_packages(
+                base_path, environment, platform
+            ).items()
+        }
 
-        return read_lock_packages(base_path, environment, platform), identity
+        return read_lock_packages(base_path, environment, platform), pypi, identity
 
     if base_path.suffix == ".zip":
         with zipfile.ZipFile(base_path) as archive:
@@ -272,18 +424,18 @@ def read_base(base_path, environment, platform):
                 archive.open(packs[0]) as stream,
                 tarfile.open(fileobj=stream, mode="r|") as pack,
             ):
-                packages, pack_identity = read_pack_packages(pack)
+                packages, pypi, pack_identity = read_pack_packages(pack)
 
     else:
         identity["kind"] = "pack"
         identity["pack"] = base_path.name
 
         with tarfile.open(base_path, mode="r|") as pack:
-            packages, pack_identity = read_pack_packages(pack)
+            packages, pypi, pack_identity = read_pack_packages(pack)
 
     identity.update(pack_identity)
 
-    return packages, identity
+    return packages, pypi, identity
 
 
 def default_bases(platform):
@@ -377,6 +529,97 @@ def select_update_packages(target, base, install_names):
     return sorted(selected.values())
 
 
+def path_dependencies_to_build(target_pypi, base_pypis, full=False):
+    """The path dependencies whose wheels must be built to compare or ship.
+
+    A path dependency's version is only known once built, so build every one
+    a base might lack or have at another version: all of them, except the
+    MicroDrop wheel when no base has it (only git-linked installs).
+    """
+
+    return sorted(
+        name
+        for name, package in target_pypi.items()
+        if package.path is not None
+        and (full or name != MICRODROP_DIST or any(name in base for base in base_pypis))
+    )
+
+
+def select_pypi_names(target_pypi, base):
+    """The PyPI packages one base lacks or has at another version.
+
+    MicroDrop's own wheel only counts where the base has it: a base without
+    it is a git hand-off, whose clone the wheel would shadow.
+    """
+
+    return sorted(
+        name
+        for name, package in target_pypi.items()
+        if base.get(name) is None or base[name] != package.version
+        if name in base or name != MICRODROP_DIST
+    )
+
+
+def build_path_wheel(package, out_dir):
+    """Build a path dependency's wheel, as the pack's ``build-wheels`` does.
+
+    Returns
+    -------
+    PypiPackage
+        The package with its version, and ``path`` now the built wheel.
+    """
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        ["pixi", "exec", "uv", "build", "--wheel", "-o", str(out_dir)]
+        + [str(package.path)],
+        check=True,
+    )
+
+    wheels = [
+        path
+        for path in out_dir.glob("*.whl")
+        if distribution_name_version(path.name)[0] == package.name
+    ]
+
+    if len(wheels) != 1:
+        raise SystemExit(f"building {package.path} left {len(wheels)} wheels")
+
+    version = distribution_name_version(wheels[0].name)[1]
+
+    # hatch-vcs appends .dYYYYMMDD when `src` has uncommitted changes, and
+    # falls back to 0.0.0 with no git history: neither traces to a commit.
+    if DIRTY_VERSION.search(version) or version == FALLBACK_VERSION:
+        raise SystemExit(
+            f"{package.name} {version} was built from {package.path} with "
+            f"uncommitted changes or no git history - commit or stash the "
+            f"changes (or check out the submodule) and re-run"
+        )
+
+    return package._replace(version=version, path=wheels[0])
+
+
+def fetch_wheel(package, cache):
+    """Return a cached, checksum-verified wheel of a lock PyPI package.
+
+    The cache is pixi-pack's ``dist/pack-cache/pypi`` layout.
+    """
+
+    cached = cache / "pypi" / package.url.rsplit("/", 1)[-1]
+
+    if cached.exists() and file_sha256(cached) == package.sha256:
+        return cached
+
+    download(package.url, cached)
+
+    if file_sha256(cached) != package.sha256:
+        cached.unlink()
+
+        raise SystemExit(f"{package.url} does not match its pixi.lock sha256")
+
+    return cached
+
+
 def fetch_package(package, cache):
     """Return a cached, checksum-verified archive of a lock package.
 
@@ -456,21 +699,31 @@ def write_manifest(folder, manifest):
     ``optional-specs.txt`` the stripped toolchain packages, installed only
     where the install already has them; ``plugins.txt`` the plugin package
     names, whose versions the script shows before and after.
+    ``pypi-specs.txt`` holds the ``name==version`` PyPI requirements but
+    MicroDrop's, which ``microdrop-spec.txt`` holds alone: the script skips
+    it for a git-linked install.
     """
 
     (folder / "update.json").write_text(json.dumps(manifest, indent=2) + "\n")
 
+    microdrop = f"{MICRODROP_DIST}=="
     lists = {
         "specs.txt": manifest["install"],
         "optional-specs.txt": manifest["optional"],
         "plugins.txt": [spec.split("=")[0] for spec in manifest["plugins"]],
+        "pypi-specs.txt": [
+            spec for spec in manifest["pypi"] if not spec.startswith(microdrop)
+        ],
+        "microdrop-spec.txt": [
+            spec for spec in manifest["pypi"] if spec.startswith(microdrop)
+        ],
     }
 
     for filename, lines in lists.items():
         write_windows_text(folder / filename, "".join(f"{line}\n" for line in lines))
 
 
-def describe_base(identity, base, plugin_names):
+def describe_base(identity, base, base_pypi, plugin_names):
     """A base's manifest entry: its identity, size and plugin versions."""
 
     plugins = {
@@ -479,11 +732,23 @@ def describe_base(identity, base, plugin_names):
         if name in base
     }
 
-    return identity | {"packages": len(base), "plugins": plugins}
+    return identity | {
+        "packages": len(base),
+        "pypi_packages": len(base_pypi),
+        "plugins": plugins,
+    }
 
 
 def build_manifest(
-    date, platform, environment, bases, plugin_names, install, channel, full=False
+    date,
+    platform,
+    environment,
+    bases,
+    plugin_names,
+    install,
+    channel,
+    pypi=(),
+    full=False,
 ):
     """The ``update.json`` content.
 
@@ -496,6 +761,8 @@ def build_manifest(
         ``optional``.
     channel
         Every package the bundle's channel carries.
+    pypi
+        The PyPI packages whose wheels the bundle ships and installs.
     """
 
     return {
@@ -517,6 +784,7 @@ def build_manifest(
             for package in install
             if STRIPPED_PACKAGE_REGEX.match(package.name)
         ],
+        "pypi": [pypi_spec(package) for package in pypi],
         "channel": [
             {
                 "name": package.name,
@@ -527,6 +795,21 @@ def build_manifest(
             for package in channel
         ],
     }
+
+
+def describe_microdrop(pypi):
+    """The README's paragraph on MicroDrop's own code."""
+
+    versions = [package.version for package in pypi if package.name == MICRODROP_DIST]
+    git_note = (
+        "A MicroDrop installed with git keeps its own code: update that with\n"
+        "update-microdrop.bat in your MicroDrop folder."
+    )
+
+    if not versions:
+        return f"MicroDrop's own code is not part of this update.\n{git_note}"
+
+    return f"MicroDrop itself is updated to {versions[0]}.\n{git_note}"
 
 
 def build_update(platform, environment, base_paths=(), lock_path=None, full=False):
@@ -540,28 +823,46 @@ def build_update(platform, environment, base_paths=(), lock_path=None, full=Fals
     print(f"lock: {lock_path}")
 
     target = read_lock_packages(lock_path, environment, platform)
+    target_pypi = read_lock_pypi_packages(lock_path, environment, platform)
     plugin_names = read_plugin_names(lock_path.with_name("pyproject.toml"))
+    base_paths = [] if full else list(base_paths) or default_bases(platform)
+    bases = []
+
+    for base_path in base_paths:
+        print(f"base: {base_path}")
+        bases.append((base_path, *read_base(base_path, environment, platform)))
+
+    # Path dependencies have no locked version: build them to learn it.
+    wheel_build = DIST / "update-wheels"
+
+    if wheel_build.exists():
+        shutil.rmtree(wheel_build)
+
+    for name in path_dependencies_to_build(
+        target_pypi, [base_pypi for _, _, base_pypi, _ in bases], full
+    ):
+        target_pypi[name] = build_path_wheel(target_pypi[name], wheel_build)
+
     install_names = set()
     selected = set()
-    bases = []
+    pypi_names = set()
 
     if full:
         install_names.update(select_full_install_names(target))
         selected.update(select_update_packages(target, {}, install_names))
+        pypi_names.update(target_pypi)
 
     # The bundle covers every base: install the union of what each one lacks,
     # and ship the union of what each one needs.
-    for base_path in [] if full else base_paths or default_bases(platform):
-        print(f"base: {base_path}")
-
-        base, identity = read_base(base_path, environment, platform)
+    for _, base, base_pypi, _ in bases:
         names = select_install_names(target, base)
         install_names.update(names)
         selected.update(select_update_packages(target, base, names))
-        bases.append(describe_base(identity, base, plugin_names))
+        pypi_names.update(select_pypi_names(target_pypi, base_pypi))
 
     install = [target[name] for name in sorted(install_names)]
     selected = sorted(selected)
+    pypi = [target_pypi[name] for name in sorted(pypi_names)]
 
     date = datetime.date.today().isoformat()
     folder_name = f"microdrop-update-{date}-{platform}"
@@ -577,13 +878,34 @@ def build_update(platform, environment, base_paths=(), lock_path=None, full=Fals
         subdir.mkdir(parents=True, exist_ok=True)
         shutil.copy2(fetch_package(package, cache), subdir)
 
-    print(f"install {len(install)} packages; the channel carries {len(selected)}")
+    wheels = folder / "wheels"
+    wheels.mkdir(parents=True)
+
+    for package in pypi:
+        wheel = package.path if package.url is None else fetch_wheel(package, cache)
+        shutil.copy2(wheel, wheels)
+
+    print(
+        f"install {len(install)} conda packages (the channel carries "
+        f"{len(selected)}) and {len(pypi)} PyPI packages"
+    )
 
     index_channel(channel, platform)
     shutil.copy2(fetch_micromamba(platform, cache), folder / "micromamba.exe")
 
     manifest = build_manifest(
-        date, platform, environment, bases, plugin_names, install, selected, full
+        date,
+        platform,
+        environment,
+        [
+            describe_base(identity, base, base_pypi, plugin_names)
+            for _, base, base_pypi, identity in bases
+        ],
+        plugin_names,
+        install,
+        selected,
+        pypi,
+        full,
     )
     write_manifest(folder, manifest)
 
@@ -598,8 +920,9 @@ def build_update(platform, environment, base_paths=(), lock_path=None, full=Fals
             title=title,
             title_rule="=" * len(title),
             folder_name=folder_name,
-            count=len(install),
+            count=len(install) + len(pypi),
             plugins="\n".join(f"    {spec}" for spec in manifest["plugins"]),
+            microdrop=describe_microdrop(pypi),
         )
     )
     write_windows_text(folder / "README.txt", readme)

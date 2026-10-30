@@ -3,15 +3,18 @@ setlocal
 title Update MicroDrop
 
 rem Bring an existing MicroDrop install up to the package versions in
-rem .\channel, offline. micromamba resolves them against the local channel
-rem and the packages the install already has; nothing is downloaded.
+rem .\channel and .\wheels, offline. micromamba resolves the conda packages
+rem against the local channel and the packages the install already has, then
+rem the install's own pip installs the PyPI wheels; nothing is downloaded.
+rem MicroDrop's own wheel is skipped for a git install (MicroDrop linked from
+rem its clone in ..\microdrop), which update-microdrop.bat updates instead.
 rem Set MICRODROP_UPDATE_NOPAUSE=1 to run it unattended (no pause at the end).
 
 rem Work from this script's folder, wherever it was double-clicked from.
 cd /d "%~dp0"
 set "HERE=%~dp0"
 
-for %%F in (micromamba.exe fix-conda-meta.py specs.txt optional-specs.txt plugins.txt channel\noarch\repodata.json) do if not exist "%%F" goto :incomplete
+for %%F in (micromamba.exe fix-conda-meta.py specs.txt optional-specs.txt plugins.txt pypi-specs.txt microdrop-spec.txt channel\noarch\repodata.json) do if not exist "%%F" goto :incomplete
 
 rem Find the install: this folder unzipped inside the MicroDrop folder (the
 rem expected case), the MicroDrop folder itself, or ask for it.
@@ -73,6 +76,29 @@ rem root prefix holds micromamba's package cache; keep it inside this folder.
 if errorlevel 1 goto :install_failed
 
 :installed
+rem The PyPI wheels go in after the conda packages, with the install's own
+rem pip, from .\wheels only. -I and --isolated: ignore any Python or pip
+rem settings on this PC. --no-deps: the wheels are the complete set.
+set "SITE=%ENV_DIR%\Lib\site-packages"
+set "MICRODROP_WHEEL="
+if exist "%SITE%\microdrop_py-*.dist-info" set "MICRODROP_WHEEL=1"
+if exist "%SITE%\microdrop_git.pth" set "MICRODROP_WHEEL="
+
+rem The loop variable must not be a letter that follows a percent sign in
+rem %PIP_SPECS% (e.g. P), or cmd substitutes it inside the variable name.
+set "PIP_SPECS="
+for /f "usebackq delims=" %%L in ("%HERE%pypi-specs.txt") do call set "PIP_SPECS=%%PIP_SPECS%% %%L"
+if defined MICRODROP_WHEEL for /f "usebackq delims=" %%L in ("%HERE%microdrop-spec.txt") do call set "PIP_SPECS=%%PIP_SPECS%% %%L"
+if not defined MICRODROP_WHEEL call :note_git_install
+if not defined PIP_SPECS goto :pip_done
+
+echo.
+echo Installing PyPI packages:%PIP_SPECS%
+echo.
+"%ENV_DIR%\python.exe" -I -m pip install --isolated --no-index --no-deps --disable-pip-version-check --no-warn-script-location --find-links "%HERE%wheels" --upgrade %PIP_SPECS%
+if errorlevel 1 goto :install_failed
+
+:pip_done
 echo.
 echo Plugins installed now:
 call :show_plugins
@@ -94,6 +120,13 @@ for %%F in ("%ENV_DIR%\conda-meta\%~1-*.json") do (
     set "FOUND=1"
 )
 if not defined FOUND echo   %~1 - not installed
+goto :eof
+
+:note_git_install
+echo.
+echo MicroDrop itself runs from its git clone here, so this update leaves its
+echo code alone: run update-microdrop.bat in your MicroDrop folder to update
+echo it (that needs internet).
 goto :eof
 
 :ask_folder

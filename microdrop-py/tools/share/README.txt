@@ -19,10 +19,10 @@ installed, and no internet connection is needed.
 
 Updates
 -------
-Newer plugins (heater, magnet, fluorescence) come as a separate, small
-microdrop-update zip: unzip it inside this folder and run its
-apply-update.bat - see the README.txt in it. A newer MicroDrop itself
-needs a new copy of this download.
+Updates come as a separate microdrop-update zip that brings this install
+up to date - MicroDrop itself, its plugins (heater, magnet, fluorescence)
+and the packages it runs on - without reinstalling: unzip it inside this
+folder and run its apply-update.bat - see the README.txt in it.
 
 
 Other devices

@@ -9,6 +9,8 @@ It installs {count} packages, including these plugins:
 
 {plugins}
 
+{microdrop}
+
 
 1. Unzip this download INSIDE your MicroDrop folder - the folder with
    install.bat, run-microdrop.bat and the env folder - so that it holds a
@@ -47,9 +49,12 @@ Files
 -----
 apply-update.bat    installs the update into ..\env
 channel\            the updated packages
+wheels\             the updated Python (PyPI) packages, installed after them
 micromamba.exe      package installer used by apply-update.bat
 fix-conda-meta.py   prepares the install's package records for micromamba
 update.json         what this update contains and which installs it is for
 specs.txt           the exact package versions apply-update.bat installs
 optional-specs.txt  build tools updated only where they are installed
 plugins.txt         the plugins whose versions apply-update.bat shows
+pypi-specs.txt      the exact Python package versions it installs
+microdrop-spec.txt  the MicroDrop version it installs (not into a git install)

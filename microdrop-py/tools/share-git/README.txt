@@ -35,9 +35,10 @@ update also needs a newer environment (new packages); MicroDrop will then
 fail to start with a "No module named ..." error. Get a new copy of this
 download in that case - the updates themselves never need one otherwise.
 
-Newer plugins (heater, magnet, fluorescence) come as a separate, small
-microdrop-update zip: unzip it inside this folder and run its
-apply-update.bat - see the README.txt in it.
+Newer plugins (heater, magnet, fluorescence) and a newer environment come
+as a separate microdrop-update zip, which needs no internet: unzip it
+inside this folder and run its apply-update.bat - see the README.txt in it.
+It leaves MicroDrop's own code to update-microdrop.bat.
 
 
 Troubleshooting

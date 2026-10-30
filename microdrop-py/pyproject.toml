@@ -224,8 +224,9 @@ pack-prod-slim = { cmd = "python tools/prune_pack.py dist/microdrop-{{ environme
 #        `pixi run share-prod win-64 prod-no-ai` -> dist/share-microdrop-<version>-win-64-no-AI.zip
 share-prod = { cmd = "python tools/build_share.py {{ platform }} {{ environment }}", args = ["platform", { arg = "environment", default = "prod" }], depends-on = [{ task = "pack-prod-slim", args = ["{{ platform }}", "{{ environment }}"] }] }
 # Bring an existing hand-off install up to this lock without a reinstall:
-# every conda package the lock has that the customer's pack lacks or has at
-# another version, as a local conda channel + micromamba + apply-update.bat
+# every conda and PyPI package the lock has that the customer's pack lacks or
+# has at another version (MicroDrop's own wheel included, except for git
+# installs), as a local conda channel + micromamba + wheels + apply-update.bat
 # from tools/share-update/ — see tools/build_update.py. Relock first. The
 # bases default to every slim pack and hand-off zip in dist/ (the bundle
 # covers their union); name others with --base (repeatable), or ship the
