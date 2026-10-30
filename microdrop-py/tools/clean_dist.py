@@ -12,7 +12,8 @@
 
 The pack pipeline leaves several GB behind: the full and slim packs, the
 injected wheels, and the unzipped hand-off folders. Only the hand-off zips
-are worth keeping, plus the download cache that makes the next pack fast.
+are worth keeping (and the plugin update zips), plus the download cache
+that makes the next pack fast.
 
 Usage: python tools/clean_dist.py [dist_dir]
 """
@@ -24,13 +25,14 @@ from pathlib import Path
 
 DIST = Path(__file__).parent.parent / "dist"
 
-#: What survives a clean: the hand-off zips and the pixi-pack download cache.
-KEEP_GLOB = "share-microdrop-*.zip"
+#: What survives a clean: the hand-off and plugin update zips, and the
+#: pixi-pack download cache.
+KEEP_GLOBS = ("share-microdrop-*.zip", "microdrop-plugins-update-*.zip")
 KEEP_DIRS = {"pack-cache"}
 
 
 def clean_dist(dist):
-    """Delete everything in `dist` except the hand-off zips and the cache."""
+    """Delete everything in `dist` except the zips and the cache."""
 
     if not dist.is_dir():
         print(f"nothing to clean: {dist} does not exist")
@@ -39,7 +41,7 @@ def clean_dist(dist):
     freed = 0
 
     for entry in sorted(dist.iterdir()):
-        if entry.name in KEEP_DIRS or entry.match(KEEP_GLOB):
+        if entry.name in KEEP_DIRS or any(map(entry.match, KEEP_GLOBS)):
             continue
 
         if entry.is_dir():

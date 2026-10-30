@@ -44,6 +44,8 @@ PIXI_UNPACK_URL = (
     "v{version}/pixi-unpack-x86_64-pc-windows-msvc.exe"
 )
 
+USER_AGENT = "microdrop-share-tools"
+
 DIRTY_VERSION = re.compile(r"\.d\d{8}$")
 
 #: Must match the fluorescence plugin's DEFAULT_AI_MODEL, or the bundled
@@ -111,20 +113,28 @@ def fetch_pixi_unpack(version):
     if cached.exists() and cached.stat().st_size > 0:
         return cached
 
-    cached.parent.mkdir(parents=True, exist_ok=True)
-    url = PIXI_UNPACK_URL.format(version=version)
+    download(PIXI_UNPACK_URL.format(version=version), cached)
+
+    return cached
+
+
+def download(url, target):
+    """Download ``url`` to ``target``, creating its folder."""
+
+    target.parent.mkdir(parents=True, exist_ok=True)
     print(f"downloading {url}")
 
     # Download beside the target and rename, so an interrupted download never
-    # leaves a truncated file that the size check above would accept.
-    partial = cached.with_suffix(".part")
+    # leaves a truncated file that a cache check would accept.
+    partial = target.with_name(target.name + ".part")
 
-    with urllib.request.urlopen(url) as response, open(partial, "wb") as out:
+    # prefix.dev's CDN refuses urllib's default user agent.
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+
+    with urllib.request.urlopen(request) as response, open(partial, "wb") as out:
         shutil.copyfileobj(response, out)
 
-    partial.replace(cached)
-
-    return cached
+    partial.replace(target)
 
 
 def collect_model_blobs(model_name):

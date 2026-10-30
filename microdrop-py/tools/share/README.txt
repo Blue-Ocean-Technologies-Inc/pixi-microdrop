@@ -17,6 +17,14 @@ installed, and no internet connection is needed.
    older versions' Desktop shortcuts and offers to delete their folders.
 
 
+Updates
+-------
+Newer plugins (heater, magnet, fluorescence) come as a separate, small
+microdrop-plugins-update zip: unzip it inside this folder and run its
+update-plugins.bat - see the README.txt in it. A newer MicroDrop itself
+needs a new copy of this download.
+
+
 Other devices
 -------------
 run-microdrop.bat starts MicroDrop for the DropBot. For another device, run
