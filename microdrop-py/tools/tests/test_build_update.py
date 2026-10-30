@@ -257,8 +257,7 @@ def test_read_base_from_a_lock(lock_path):
 
 def select(lock_path, base_packages):
     target = bu.read_lock_packages(lock_path, "prod", "win-64")
-    plugins = ["heater-microdrop-plugin", "magnet-microdrop-plugin"]
-    install = bu.select_install_names(target, base_packages, plugins)
+    install = bu.select_install_names(target, base_packages)
 
     return {
         package.name: package
@@ -266,56 +265,43 @@ def select(lock_path, base_packages):
     }
 
 
-def test_select_install_names_adds_packages_new_to_the_base(lock_path, base_packages):
+#: What BASE lacks or has at another version/build: the changed plugin and
+#: libzlib and numpy, the new sympy (with mpmath) and send2trash. Unchanged
+#: magnet, mpremote and python stay out, and so does clang, the toolchain a
+#: slim pack strips.
+CHANGED_FROM_BASE = [
+    "heater-microdrop-plugin",
+    "libzlib",
+    "mpmath",
+    "numpy",
+    "send2trash",
+    "sympy",
+]
+
+
+def test_select_install_names_takes_every_changed_package(lock_path, base_packages):
     target = bu.read_lock_packages(lock_path, "prod", "win-64")
-    plugins = ["heater-microdrop-plugin", "magnet-microdrop-plugin"]
 
-    names = bu.select_install_names(target, base_packages, plugins)
+    names = bu.select_install_names(target, base_packages)
 
-    # The plugins, plus every package the base lacks by name - except the
-    # toolchain a slim pack strips (clang). Changed numpy is not installed.
-    assert names == [
-        "heater-microdrop-plugin",
-        "magnet-microdrop-plugin",
-        "mpmath",
-        "send2trash",
-        "sympy",
-    ]
+    assert names == CHANGED_FROM_BASE
 
 
-def test_select_always_includes_the_plugins(lock_path, base_packages):
+def test_select_install_names_keeps_toolchain_packages_the_base_has(
+    lock_path, base_packages
+):
+    target = bu.read_lock_packages(lock_path, "prod", "win-64")
+    base_packages["clang"] = bu.Package("clang", "19.1.0", "h_0", "win-64")
+
+    names = bu.select_install_names(target, base_packages)
+
+    assert "clang" in names
+
+
+def test_select_ships_exactly_the_changed_packages(lock_path, base_packages):
     selected = select(lock_path, base_packages)
 
-    # magnet is unchanged from the base but still ships, so its spec installs.
-    assert selected["magnet-microdrop-plugin"].version == "1.2.1"
-    assert selected["heater-microdrop-plugin"].version == "1.12.0"
-
-
-def test_select_ships_new_and_changed_dependencies_only(lock_path, base_packages):
-    selected = select(lock_path, base_packages)
-
-    # New, through the plugin and transitively through the new package.
-    assert "sympy" in selected
-    assert "mpmath" in selected
-
-    # Unchanged dependencies the install already has.
-    assert "mpremote" not in selected
-    assert "python" not in selected
-    assert "ucrt" not in selected
-
-    # Changed in the lock but outside the plugins' dependency closure.
-    assert "numpy" not in selected
-
-    # A workspace-level dependency no plugin declares still ships.
-    assert "send2trash" in selected
-
-    assert sorted(selected) == [
-        "heater-microdrop-plugin",
-        "magnet-microdrop-plugin",
-        "mpmath",
-        "send2trash",
-        "sympy",
-    ]
+    assert sorted(selected) == CHANGED_FROM_BASE
 
 
 def test_select_ships_a_dependency_whose_version_changed(lock_path, base_packages):
@@ -356,63 +342,83 @@ def test_select_leaves_out_toolchain_packages_a_slim_base_stripped(
     assert "clang" not in names
 
 
-def test_select_fails_when_the_lock_lacks_a_plugin(lock_path, base_packages):
+def test_select_full_install_names_takes_all_but_the_toolchain(lock_path):
     target = bu.read_lock_packages(lock_path, "prod", "win-64")
 
-    with pytest.raises(SystemExit, match="fluorescence-microdrop-plugin"):
-        bu.select_install_names(
-            target, base_packages, ["fluorescence-microdrop-plugin"]
-        )
+    names = bu.select_full_install_names(target)
+
+    assert names == sorted(set(target) - {"clang"})
 
 
-def test_write_manifest_writes_specs_and_base_plugins(tmp_path, lock_path):
+def test_default_bases_takes_slim_packs_and_hand_off_zips(tmp_path, monkeypatch):
+    for name in (
+        "microdrop-prod-win-64.tar",
+        "microdrop-prod-slim-win-64.tar",
+        "microdrop-prod-no-ai-slim-win-64.tar",
+        "share-microdrop-1.23.0-win-64-no-AI.zip",
+        "share-microdrop-git-v1.24.2-8-g684be6ba-win-64.zip",
+        "share-microdrop-1.23.0-linux-64.zip",
+        "microdrop-update-2026-10-30-win-64.zip",
+    ):
+        (tmp_path / name).write_text("")
+
+    monkeypatch.setattr(bu, "DIST", tmp_path)
+
+    names = [path.name for path in bu.default_bases("win-64")]
+
+    assert names == [
+        "microdrop-prod-no-ai-slim-win-64.tar",
+        "microdrop-prod-slim-win-64.tar",
+        "share-microdrop-1.23.0-win-64-no-AI.zip",
+        "share-microdrop-git-v1.24.2-8-g684be6ba-win-64.zip",
+    ]
+
+
+def test_write_manifest_writes_specs_optional_specs_and_plugins(tmp_path, lock_path):
     target = bu.read_lock_packages(lock_path, "prod", "win-64")
     base = {
         name: bu.Package(name, version, build, subdir)
         for name, (version, build, subdir) in BASE.items()
     }
     plugin_names = ["heater-microdrop-plugin", "magnet-microdrop-plugin"]
-    install = [target[name] for name in plugin_names + ["sympy"]]
+    bases = [bu.describe_base({"source": "x.tar"}, base, plugin_names)]
+    install = [target[name] for name in ("clang", "heater-microdrop-plugin", "sympy")]
     channel = [target["heater-microdrop-plugin"], target["sympy"]]
 
     manifest = bu.build_manifest(
-        "2026-10-29",
-        "win-64",
-        "prod",
-        {"source": "x.tar"},
-        base,
-        plugin_names,
-        install,
-        channel,
+        "2026-10-29", "win-64", "prod", bases, plugin_names, install, channel
     )
     bu.write_manifest(tmp_path, manifest)
 
-    assert manifest["plugins"] == [
+    assert manifest["plugins"] == ["heater-microdrop-plugin=1.12.0=pyh4616a5c_0"]
+    assert manifest["install"] == [
         "heater-microdrop-plugin=1.12.0=pyh4616a5c_0",
-        "magnet-microdrop-plugin=1.2.1=pyh4616a5c_0",
+        "sympy=1.14.0=pyh2585a3b_105",
     ]
-    assert manifest["install"] == manifest["plugins"] + ["sympy=1.14.0=pyh2585a3b_105"]
-    assert manifest["base"]["plugins"] == {
+    assert manifest["optional"] == ["clang=20.1.0=h_0"]
+    assert manifest["bases"][0]["plugins"] == {
         "heater-microdrop-plugin": "1.10.1=pyh4616a5c_0",
         "magnet-microdrop-plugin": "1.2.1=pyh4616a5c_0",
     }
-    assert manifest["base"]["packages"] == len(BASE)
+    assert manifest["bases"][0]["packages"] == len(BASE)
     assert json.loads((tmp_path / "update.json").read_text()) == manifest
 
     assert (tmp_path / "specs.txt").read_bytes() == (
         b"heater-microdrop-plugin=1.12.0=pyh4616a5c_0\r\n"
-        b"magnet-microdrop-plugin=1.2.1=pyh4616a5c_0\r\n"
         b"sympy=1.14.0=pyh2585a3b_105\r\n"
     )
-    assert (tmp_path / "base-plugins.txt").read_bytes() == (
-        b"heater-microdrop-plugin-1.10.1-pyh4616a5c_0\r\n"
-        b"magnet-microdrop-plugin-1.2.1-pyh4616a5c_0\r\n"
-    )
+    assert (tmp_path / "optional-specs.txt").read_bytes() == b"clang=20.1.0=h_0\r\n"
+    assert (tmp_path / "plugins.txt").read_bytes() == b"heater-microdrop-plugin\r\n"
 
 
-def test_build_update_smoke(tmp_path, monkeypatch, lock_path):
+@pytest.fixture
+def fake_dist(tmp_path, monkeypatch):
+    """Point the builder at an empty dist/ with stubbed downloads and indexer.
+
+    Returns the dist folder, the downloaded URLs and the commands run.
+    """
+
     dist = tmp_path / "dist"
-    pack_path = write_pack(tmp_path / "microdrop-prod-slim-win-64.tar")
     downloads = []
     commands = []
 
@@ -425,7 +431,25 @@ def test_build_update_smoke(tmp_path, monkeypatch, lock_path):
     monkeypatch.setattr(bu, "download", fake_download)
     monkeypatch.setattr(bu.subprocess, "run", lambda *a, **k: commands.append(a))
 
-    zip_path = bu.build_update("win-64", "prod", pack_path, lock_path)
+    return dist, downloads, commands
+
+
+def bundle_files(dist, subfolder):
+    date = datetime.date.today().isoformat()
+    folder = dist / "share" / f"microdrop-update-{date}-win-64" / subfolder
+
+    return sorted(
+        path.relative_to(folder).as_posix()
+        for path in folder.rglob("*")
+        if path.is_file()
+    )
+
+
+def test_build_update_smoke(tmp_path, fake_dist, lock_path):
+    dist, downloads, commands = fake_dist
+    pack_path = write_pack(tmp_path / "microdrop-prod-slim-win-64.tar")
+
+    zip_path = bu.build_update("win-64", "prod", [pack_path], lock_path)
 
     date = datetime.date.today().isoformat()
     folder_name = f"microdrop-update-{date}-win-64"
@@ -433,20 +457,15 @@ def test_build_update_smoke(tmp_path, monkeypatch, lock_path):
 
     assert zip_path == dist / f"{folder_name}.zip"
 
-    channel_files = sorted(
-        path.relative_to(folder / "channel").as_posix()
-        for path in (folder / "channel").rglob("*")
-        if path.is_file()
-    )
-
     # The indexer is stubbed, so both indexes are the empty fallbacks.
-    assert channel_files == [
+    assert bundle_files(dist, "channel") == [
         "noarch/heater-microdrop-plugin-1.12.0-pyh4616a5c_0.conda",
-        "noarch/magnet-microdrop-plugin-1.2.1-pyh4616a5c_0.conda",
         "noarch/mpmath-1.3.0-pyhd8ed1ab_1.conda",
         "noarch/repodata.json",
         "noarch/send2trash-1.8.3-pyh5737063_1.conda",
         "noarch/sympy-1.14.0-pyh2585a3b_105.conda",
+        "win-64/libzlib-1.3.2-h2466b09_0.conda",
+        "win-64/numpy-2.3.0-py313h_0.conda",
         "win-64/repodata.json",
     ]
     assert commands[0][0][:4] == ["pixi", "exec", "--spec", bu.RATTLER_INDEX_SPEC]
@@ -459,9 +478,10 @@ def test_build_update_smoke(tmp_path, monkeypatch, lock_path):
 
     manifest = json.loads((folder / "update.json").read_text())
 
-    assert manifest["base"]["pack"] == pack_path.name
-    assert manifest["base"]["microdrop_version"] == "1.24.2"
-    assert len(manifest["channel"]) == 5
+    assert manifest["full"] is False
+    assert manifest["bases"][0]["pack"] == pack_path.name
+    assert manifest["bases"][0]["microdrop_version"] == "1.24.2"
+    assert len(manifest["channel"]) == 6
     assert "send2trash=1.8.3=pyh5737063_1" in manifest["install"]
 
     for name in (
@@ -469,12 +489,18 @@ def test_build_update_smoke(tmp_path, monkeypatch, lock_path):
         "fix-conda-meta.py",
         "README.txt",
         "specs.txt",
+        "optional-specs.txt",
+        "plugins.txt",
         "micromamba.exe",
     ):
         assert (folder / name).exists()
 
     assert b"\r\n" in (folder / "apply-update.bat").read_bytes()
-    assert b"heater-microdrop-plugin=1.12.0" in (folder / "README.txt").read_bytes()
+
+    readme = (folder / "README.txt").read_bytes()
+
+    assert b"It installs 6 packages" in readme
+    assert b"heater-microdrop-plugin=1.12.0" in readme
 
     with zipfile.ZipFile(zip_path) as archive:
         names = archive.namelist()
@@ -484,6 +510,49 @@ def test_build_update_smoke(tmp_path, monkeypatch, lock_path):
 
     # A second build reuses the verified cache instead of downloading again.
     downloads.clear()
-    bu.build_update("win-64", "prod", pack_path, lock_path)
+    bu.build_update("win-64", "prod", [pack_path], lock_path)
 
     assert downloads == []
+
+
+def test_build_update_covers_the_union_of_several_bases(tmp_path, fake_dist, lock_path):
+    dist, _, _ = fake_dist
+    pack_path = write_pack(tmp_path / "microdrop-prod-slim-win-64.tar")
+
+    # An install that is current but for an older magnet plugin.
+    conda_meta = tmp_path / "MicroDrop" / "env" / "conda-meta"
+    conda_meta.mkdir(parents=True)
+
+    for url in TARGET:
+        package = bu.package_from_url(url)
+
+        if package.name == "magnet-microdrop-plugin":
+            package = package._replace(version="1.2.0")
+
+        record = package._asdict() | {"depends": []}
+        (conda_meta / f"{bu.package_stem(package)}.json").write_text(json.dumps(record))
+
+    bu.build_update("win-64", "prod", [pack_path, conda_meta.parent.parent], lock_path)
+
+    folder = dist / "share" / f"microdrop-update-{datetime.date.today()}-win-64"
+    manifest = json.loads((folder / "update.json").read_text())
+
+    assert [base["kind"] for base in manifest["bases"]] == ["pack", "install"]
+    assert "magnet-microdrop-plugin=1.2.1=pyh4616a5c_0" in manifest["install"]
+    assert "heater-microdrop-plugin=1.12.0=pyh4616a5c_0" in manifest["install"]
+    assert len(manifest["install"]) == len(CHANGED_FROM_BASE) + 1
+
+
+def test_build_update_full_ships_the_whole_environment(fake_dist, lock_path):
+    dist, _, _ = fake_dist
+
+    bu.build_update("win-64", "prod", [], lock_path, full=True)
+
+    folder = dist / "share" / f"microdrop-update-{datetime.date.today()}-win-64"
+    manifest = json.loads((folder / "update.json").read_text())
+
+    assert manifest["full"] is True
+    assert manifest["bases"] == []
+    assert len(manifest["install"]) == len(TARGET) - 1
+    assert manifest["optional"] == []
+    assert not any("clang" in path for path in bundle_files(dist, "channel"))

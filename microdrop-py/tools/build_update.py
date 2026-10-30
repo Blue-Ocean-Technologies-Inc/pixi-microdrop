@@ -8,28 +8,29 @@
 #
 # Thanks for using Microdrop open source!
 
-"""Assemble an offline plugin update bundle for a packed MicroDrop install.
+"""Assemble an offline update bundle for a packed MicroDrop install.
 
 A customer's hand-off install is a plain conda prefix (``env/``) unpacked
 from a pixi-pack, with no pixi, no conda and no channel access. This bundle
-brings newer plugin packages to it without a full reinstall: a small local
-conda channel, micromamba to install from it offline, and the
+brings it up to this workspace's locked environment without a reinstall: a
+small local conda channel, micromamba to install from it offline, and the
 apply-update.bat that drives micromamba.
 
-The target versions come from this workspace's ``pixi.lock`` (bump the plugin
-pins and relock first); the base is the pack the customer installed. The
-bundle installs the plugins plus any package the base lacks entirely (a
-dependency added to the workspace), and its channel carries those plus every
-package of their dependency closure that the base has at a different
-version/build - nothing the customer already has is shipped again. Only conda
-packages change: the MicroDrop wheel or git clone is never touched.
+The target versions come from this workspace's ``pixi.lock`` (relock first);
+the bases are the packs customers installed. The bundle installs every
+package the lock has that a base lacks or has at another version/build, and
+its channel carries those plus every changed package of their dependency
+closure - nothing a base already has is shipped again. With several bases
+the bundle covers their union. ``--full`` ignores the bases and ships the
+whole locked environment, for an install whose base is unknown.
 
 Usage: python tools/build_update.py [platform] [environment]
-                                           [--base PATH] [--lock PATH]
+                                    [--base PATH ...] [--full] [--lock PATH]
 
-``--base`` is the customer's pack: a pixi-pack ``.tar``, a hand-off
-``share-microdrop-*.zip`` holding one, a ``pixi.lock`` (read for the same
-environment), or an installed MicroDrop folder (its ``env/conda-meta``).
+``--base`` (repeatable) is a customer's pack: a pixi-pack ``.tar``, a
+hand-off ``share-microdrop-*.zip`` holding one, a ``pixi.lock`` (read for the
+same environment), or an installed MicroDrop folder (its ``env/conda-meta``).
+It defaults to every slim pack and hand-off zip for the platform in ``dist/``.
 """
 
 # Standard library imports.
@@ -56,7 +57,8 @@ TOOLS = Path(__file__).parent
 WORKSPACE = TOOLS.parent
 TEMPLATES = TOOLS / "share-update"
 
-#: The pixi features whose dependencies are the plugin packages to update.
+#: The pixi features whose dependencies are the plugin packages, whose
+#: versions apply-update.bat shows before and after the update.
 PLUGIN_FEATURES = ("plugins", "prod-plugins")
 
 #: micromamba release that apply-update.bat runs (mamba-org/micromamba-releases).
@@ -284,49 +286,55 @@ def read_base(base_path, environment, platform):
     return packages, identity
 
 
-def default_base(environment, platform):
-    """The newest pack of this environment in ``dist/``."""
+def default_bases(platform):
+    """Every pack a customer may have installed for the platform, in ``dist/``.
 
-    names = [
-        f"microdrop-{environment}-slim-{platform}.tar",
-        f"microdrop-{environment}-{platform}.tar",
-        f"microdrop-{environment}-git-slim-{platform}.tar",
-        f"microdrop-{environment}-git-{platform}.tar",
-    ]
-    packs = [DIST / name for name in names if (DIST / name).exists()]
-
-    if not packs:
-        raise SystemExit(
-            f"no {environment} pack for {platform} in {DIST} - pass --base with "
-            f"the pack (or hand-off zip) the customer installed"
-        )
-
-    return max(packs, key=lambda path: path.stat().st_mtime)
-
-
-def select_install_names(target, base, plugin_names):
-    """The packages apply-update.bat installs, sorted by name.
-
-    That is the plugins, plus every package the target environment has and
-    the base lacks entirely: those come from dependencies added to the
-    workspace rather than to a plugin package (e.g. sympy for the heater's
-    nonlinear compensation), so no plugin's dependency list would pull them
-    in. Toolchain packages stripped from slim packs stay out - the installed
-    dependents never had them.
+    That is the slim packs and the hand-off zips (which hold slim packs):
+    full packs keep the firmware toolchain, which no customer install has.
     """
 
-    missing = [name for name in plugin_names if name not in target]
+    bases = sorted(DIST.glob(f"microdrop-*-slim-{platform}.tar"))
+    bases += sorted(DIST.glob(f"share-microdrop-*-{platform}*.zip"))
 
-    if missing:
-        raise SystemExit(f"the lock has no {', '.join(missing)} for this environment")
+    if not bases:
+        raise SystemExit(
+            f"no pack or hand-off zip for {platform} in {DIST} - pass --base with "
+            f"the pack (or hand-off zip) the customer installed, or --full"
+        )
 
-    added = [
+    return bases
+
+
+def package_changed(package, installed):
+    """Whether an installed package (None: absent) differs from the target."""
+
+    if installed is None:
+        return True
+
+    return (installed.version, installed.build) != (package.version, package.build)
+
+
+def select_install_names(target, base):
+    """The packages apply-update.bat installs for one base, sorted by name.
+
+    That is every package the target environment has and the base lacks or
+    has at another version/build. Toolchain packages stripped from slim
+    packs stay out unless the base has them - the installed dependents never
+    had them.
+    """
+
+    return sorted(
         name
-        for name in target
-        if name not in base and not STRIPPED_PACKAGE_REGEX.match(name)
-    ]
+        for name, package in target.items()
+        if package_changed(package, base.get(name))
+        and (name in base or not STRIPPED_PACKAGE_REGEX.match(name))
+    )
 
-    return sorted(set(plugin_names) | set(added))
+
+def select_full_install_names(target):
+    """Every package of the target environment but the stripped toolchain."""
+
+    return sorted(name for name in target if not STRIPPED_PACKAGE_REGEX.match(name))
 
 
 def select_update_packages(target, base, install_names):
@@ -355,13 +363,9 @@ def select_update_packages(target, base, install_names):
 
         package = target[name]
         installed = base.get(name)
-        changed = installed is None or (installed.version, installed.build) != (
-            package.version,
-            package.build,
-        )
 
         if name not in install_names:
-            if not changed:
+            if not package_changed(package, installed):
                 continue
 
             if installed is None and STRIPPED_PACKAGE_REGEX.match(name):
@@ -449,48 +453,70 @@ def write_manifest(folder, manifest):
     """Write ``update.json`` and the plain-text lists apply-update.bat reads.
 
     ``specs.txt`` holds one ``name=version=build`` spec to install per line;
-    ``base-plugins.txt`` the ``conda-meta`` record names of the plugins the
-    base pack installed, so the script can warn on a different install.
+    ``optional-specs.txt`` the stripped toolchain packages, installed only
+    where the install already has them; ``plugins.txt`` the plugin package
+    names, whose versions the script shows before and after.
     """
 
     (folder / "update.json").write_text(json.dumps(manifest, indent=2) + "\n")
-    write_windows_text(folder / "specs.txt", "\n".join(manifest["install"]) + "\n")
 
-    base_plugins = [
-        f"{name}-{version_build.replace('=', '-')}"
-        for name, version_build in manifest["base"]["plugins"].items()
-    ]
-    write_windows_text(folder / "base-plugins.txt", "\n".join(base_plugins) + "\n")
+    lists = {
+        "specs.txt": manifest["install"],
+        "optional-specs.txt": manifest["optional"],
+        "plugins.txt": [spec.split("=")[0] for spec in manifest["plugins"]],
+    }
+
+    for filename, lines in lists.items():
+        write_windows_text(folder / filename, "".join(f"{line}\n" for line in lines))
 
 
-def build_manifest(
-    date, platform, environment, base_identity, base, plugin_names, install, channel
-):
-    """The ``update.json`` content.
+def describe_base(identity, base, plugin_names):
+    """A base's manifest entry: its identity, size and plugin versions."""
 
-    Parameters
-    ----------
-    install
-        The packages to install: the plugins and the packages new to the base.
-    channel
-        Every package the bundle's channel carries.
-    """
-
-    base_plugins = {
+    plugins = {
         name: f"{base[name].version}={base[name].build}"
         for name in plugin_names
         if name in base
     }
 
+    return identity | {"packages": len(base), "plugins": plugins}
+
+
+def build_manifest(
+    date, platform, environment, bases, plugin_names, install, channel, full=False
+):
+    """The ``update.json`` content.
+
+    Parameters
+    ----------
+    bases
+        The ``describe_base`` entry of every base the bundle covers.
+    install
+        The packages to install; the stripped toolchain among them goes to
+        ``optional``.
+    channel
+        Every package the bundle's channel carries.
+    """
+
     return {
         "date": date,
         "platform": platform,
         "environment": environment,
-        "base": base_identity | {"packages": len(base), "plugins": base_plugins},
+        "full": full,
+        "bases": bases,
         "plugins": [
             package_spec(package) for package in install if package.name in plugin_names
         ],
-        "install": [package_spec(package) for package in install],
+        "install": [
+            package_spec(package)
+            for package in install
+            if not STRIPPED_PACKAGE_REGEX.match(package.name)
+        ],
+        "optional": [
+            package_spec(package)
+            for package in install
+            if STRIPPED_PACKAGE_REGEX.match(package.name)
+        ],
         "channel": [
             {
                 "name": package.name,
@@ -503,24 +529,39 @@ def build_manifest(
     }
 
 
-def build_update(platform, environment, base_path=None, lock_path=None):
+def build_update(platform, environment, base_paths=(), lock_path=None, full=False):
     if platform != HANDOFF_PLATFORM:
         raise SystemExit(
             f"apply-update.bat only exists for {HANDOFF_PLATFORM}, not {platform}"
         )
 
-    base_path = base_path or default_base(environment, platform)
     lock_path = lock_path or WORKSPACE / "pixi.lock"
     cache = DIST / "pack-cache"
-    print(f"base: {base_path}")
     print(f"lock: {lock_path}")
 
-    base, base_identity = read_base(base_path, environment, platform)
     target = read_lock_packages(lock_path, environment, platform)
     plugin_names = read_plugin_names(lock_path.with_name("pyproject.toml"))
-    install_names = select_install_names(target, base, plugin_names)
-    selected = select_update_packages(target, base, install_names)
-    install = [target[name] for name in install_names]
+    install_names = set()
+    selected = set()
+    bases = []
+
+    if full:
+        install_names.update(select_full_install_names(target))
+        selected.update(select_update_packages(target, {}, install_names))
+
+    # The bundle covers every base: install the union of what each one lacks,
+    # and ship the union of what each one needs.
+    for base_path in [] if full else base_paths or default_bases(platform):
+        print(f"base: {base_path}")
+
+        base, identity = read_base(base_path, environment, platform)
+        names = select_install_names(target, base)
+        install_names.update(names)
+        selected.update(select_update_packages(target, base, names))
+        bases.append(describe_base(identity, base, plugin_names))
+
+    install = [target[name] for name in sorted(install_names)]
+    selected = sorted(selected)
 
     date = datetime.date.today().isoformat()
     folder_name = f"microdrop-update-{date}-{platform}"
@@ -536,30 +577,20 @@ def build_update(platform, environment, base_path=None, lock_path=None):
         subdir.mkdir(parents=True, exist_ok=True)
         shutil.copy2(fetch_package(package, cache), subdir)
 
-        installed = base.get(package.name)
-        was = f"{installed.version}={installed.build}" if installed else "new"
-        role = "install" if package.name in install_names else "dependency"
-        print(f"  {package_spec(package)}  ({role}; base: {was})")
+    print(f"install {len(install)} packages; the channel carries {len(selected)}")
 
     index_channel(channel, platform)
     shutil.copy2(fetch_micromamba(platform, cache), folder / "micromamba.exe")
 
     manifest = build_manifest(
-        date,
-        platform,
-        environment,
-        base_identity,
-        base,
-        plugin_names,
-        install,
-        selected,
+        date, platform, environment, bases, plugin_names, install, selected, full
     )
     write_manifest(folder, manifest)
 
     for script in SCRIPTS:
         write_windows_text(folder / script, (TEMPLATES / script).read_text())
 
-    title = f"MicroDrop plugin update {date}"
+    title = f"MicroDrop update {date}"
     readme = (
         (TEMPLATES / "README.txt")
         .read_text()
@@ -567,8 +598,8 @@ def build_update(platform, environment, base_path=None, lock_path=None):
             title=title,
             title_rule="=" * len(title),
             folder_name=folder_name,
-            install="\n".join(f"    {spec}" for spec in manifest["install"]),
-            base=base_identity.get("pack", base_identity["source"]),
+            count=len(install),
+            plugins="\n".join(f"    {spec}" for spec in manifest["plugins"]),
         )
     )
     write_windows_text(folder / "README.txt", readme)
@@ -590,11 +621,22 @@ def build_update(platform, environment, base_path=None, lock_path=None):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Build a plugin update bundle")
+    parser = argparse.ArgumentParser(description="Build an offline update bundle")
     parser.add_argument("platform", nargs="?", default=HANDOFF_PLATFORM)
     parser.add_argument("environment", nargs="?", default="prod")
-    parser.add_argument("--base", type=Path, help="the customer's pack or hand-off")
+    parser.add_argument(
+        "--base",
+        type=Path,
+        action="append",
+        default=[],
+        help="a customer's pack, hand-off zip, pixi.lock or install (repeatable)",
+    )
+    parser.add_argument(
+        "--full",
+        action="store_true",
+        help="ship the whole locked environment, for an install of unknown base",
+    )
     parser.add_argument("--lock", type=Path, help="pixi.lock with the target versions")
     args = parser.parse_args()
 
-    build_update(args.platform, args.environment, args.base, args.lock)
+    build_update(args.platform, args.environment, args.base, args.lock, args.full)

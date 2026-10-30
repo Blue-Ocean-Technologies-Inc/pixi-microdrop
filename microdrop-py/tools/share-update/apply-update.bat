@@ -1,19 +1,17 @@
 @echo off
 setlocal
-title Update MicroDrop plugins
+title Update MicroDrop
 
-rem Install the newer plugin packages in .\channel into an existing MicroDrop
-rem install, offline. micromamba resolves them against the local channel
-rem and the packages the install already has; nothing is downloaded. Only
-rem conda packages change: MicroDrop itself (its wheel, or the git clone in
-rem .\microdrop) is left alone.
+rem Bring an existing MicroDrop install up to the package versions in
+rem .\channel, offline. micromamba resolves them against the local channel
+rem and the packages the install already has; nothing is downloaded.
 rem Set MICRODROP_UPDATE_NOPAUSE=1 to run it unattended (no pause at the end).
 
 rem Work from this script's folder, wherever it was double-clicked from.
 cd /d "%~dp0"
 set "HERE=%~dp0"
 
-for %%F in (micromamba.exe fix-conda-meta.py specs.txt base-plugins.txt channel\noarch\repodata.json) do if not exist "%%F" goto :incomplete
+for %%F in (micromamba.exe fix-conda-meta.py specs.txt optional-specs.txt plugins.txt channel\noarch\repodata.json) do if not exist "%%F" goto :incomplete
 
 rem Find the install: this folder unzipped inside the MicroDrop folder (the
 rem expected case), the MicroDrop folder itself, or ask for it.
@@ -33,37 +31,36 @@ rem while anything runs out of the install (MicroDrop, its Redis server).
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$e = (Resolve-Path -LiteralPath $env:ENV_DIR).Path.TrimEnd('\') + '\'; $p = Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.StartsWith($e, 'OrdinalIgnoreCase') }; if ($p) { exit 3 }; exit 0" 2>nul
 if "%ERRORLEVEL%"=="3" goto :running
 
-echo Updating the MicroDrop plugins in:
+echo Updating MicroDrop in:
 echo   %ENV_DIR%
 echo.
-echo Installed now:
+echo Plugins installed now:
 call :show_plugins
 
-rem The bundle was built against one shipped install. A different one most
-rem likely still updates fine, but say so in case it does not.
-set "MISMATCH="
-for /f "usebackq delims=" %%P in ("%HERE%base-plugins.txt") do if not exist "%ENV_DIR%\conda-meta\%%P.json" set "MISMATCH=1"
-if defined MISMATCH call :warn_mismatch
-
-rem The loop variable must not be a letter that follows a percent sign in
-rem %SPECS% (e.g. S), or cmd substitutes it inside the variable name.
-set "SPECS="
-for /f "usebackq delims=" %%L in ("%HERE%specs.txt") do call set "SPECS=%%SPECS%% %%L"
+rem The packages to install: every spec in specs.txt, plus the build
+rem toolchain packages in optional-specs.txt (git, clang) only where the
+rem install already has them - slim installs leave them out on purpose.
+if not exist "%HERE%mamba-root" mkdir "%HERE%mamba-root"
+set "INSTALL_SPECS=%HERE%mamba-root\install-specs.txt"
+copy /y "%HERE%specs.txt" "%INSTALL_SPECS%" >nul
+for /f "usebackq tokens=1* delims==" %%N in ("%HERE%optional-specs.txt") do if exist "%ENV_DIR%\conda-meta\%%N-*.json" >>"%INSTALL_SPECS%" echo %%N=%%O
+set "COUNT=0"
+for /f %%C in ('type "%INSTALL_SPECS%" ^| find /c /v ""') do set "COUNT=%%C"
 
 echo.
-echo Installing:%SPECS%
-echo This takes about a minute. No internet connection is needed.
+echo Installing %COUNT% packages. This takes a few minutes. No internet
+echo connection is needed.
 echo.
+if "%COUNT%"=="0" goto :installed
 
 rem pixi-unpack records every installed package with "channel": null,
 rem which micromamba refuses to read. Fill it in from the package URL.
 "%ENV_DIR%\python.exe" -I "%HERE%fix-conda-meta.py" "%ENV_DIR%\conda-meta"
 if errorlevel 1 goto :install_failed
 
-rem micromamba cannot parse a channel or prefix path containing spaces
+rem micromamba cannot parse a channel, prefix or file path containing spaces
 rem (C:\Users\John Doe\...), so hand it the 8.3 short forms, which have
 rem none. A volume without short names returns the long path unchanged.
-if not exist "%HERE%mamba-root" mkdir "%HERE%mamba-root"
 for %%I in ("%HERE%channel") do set "CHANNEL=%%~sI"
 for %%I in ("%ENV_DIR%") do set "PREFIX=%%~sI"
 for %%I in ("%HERE%mamba-root") do set "ROOT=%%~sI"
@@ -72,21 +69,22 @@ if not "%PATHS: =%"=="%PATHS%" call :warn_spaces
 
 rem --no-rc / --no-env: ignore any conda/mamba settings on this PC. The
 rem root prefix holds micromamba's package cache; keep it inside this folder.
-"%HERE%micromamba.exe" install --no-rc --no-env -r "%ROOT%" -p "%PREFIX%" --offline --override-channels -c "%CHANNEL%" -y %SPECS%
+"%HERE%micromamba.exe" install --no-rc --no-env -r "%ROOT%" -p "%PREFIX%" --offline --override-channels -c "%CHANNEL%" -y -f "%ROOT%\install-specs.txt"
 if errorlevel 1 goto :install_failed
 
+:installed
 echo.
-echo Installed now:
+echo Plugins installed now:
 call :show_plugins
 echo.
-echo Done. Start MicroDrop again to use the updated plugins.
+echo Done. Start MicroDrop again to use the update.
 
 echo.
 if not defined MICRODROP_UPDATE_NOPAUSE pause
 exit /b 0
 
 :show_plugins
-for /f "usebackq tokens=1 delims==" %%N in ("%HERE%specs.txt") do call :show_plugin %%N
+for /f "usebackq delims=" %%N in ("%HERE%plugins.txt") do call :show_plugin %%N
 goto :eof
 
 :show_plugin
@@ -106,14 +104,6 @@ echo.
 set /p "MD_DIR=MicroDrop folder: "
 if not defined MD_DIR goto :eof
 set "MD_DIR=%MD_DIR:"=%"
-goto :eof
-
-:warn_mismatch
-echo.
-echo WARNING: this update was made for an install with these plugins:
-for /f "usebackq delims=" %%P in ("%HERE%base-plugins.txt") do echo   %%P
-echo The installed plugins differ - this install was set up from another
-echo MicroDrop download, or was updated before. Continuing anyway.
 goto :eof
 
 :warn_spaces
@@ -143,9 +133,11 @@ goto :fail
 
 :install_failed
 echo.
-echo ERROR: the plugin update failed - see the messages above. MicroDrop may
-echo now be partly updated. To go back to the shipped plugin versions, rerun
-echo install.bat from your MicroDrop download and answer Y to reinstall.
+echo ERROR: the update failed - see the messages above. MicroDrop may now be
+echo partly updated. To go back to the shipped versions, rerun install.bat
+echo from your MicroDrop download and answer Y to reinstall. If this install
+echo was not set up from a download this update was made for, ask for a full
+echo update instead.
 goto :fail
 
 :fail
