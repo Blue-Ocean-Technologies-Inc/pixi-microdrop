@@ -840,3 +840,18 @@ def test_build_update_full_ships_the_whole_environment(fake_dist, lock_path):
     assert not any("clang" in path for path in bundle_files(dist, "channel"))
     assert sorted(built) == ["microdrop-py", "pyside6-icu-preload"]
     assert len(manifest["pypi"]) == len(PYPI_TARGET) + len(PATH_DEPENDENCIES)
+
+
+def test_select_held_back_names_takes_packages_needing_a_stripped_toolchain(
+    lock_path, base_packages
+):
+    target = bu.read_lock_packages(lock_path, "prod", "win-64")
+    target["numpy"] = target["numpy"]._replace(depends=("clang >=20", "python"))
+    names = bu.select_install_names(target, base_packages)
+
+    # micromamba could not solve numpy without clang, which the base lacks.
+    assert bu.select_held_back_names(target, base_packages, names) == ["numpy"]
+
+    base_packages["clang"] = bu.Package("clang", "20.1.0", "h_0", "win-64")
+
+    assert bu.select_held_back_names(target, base_packages, names) == []

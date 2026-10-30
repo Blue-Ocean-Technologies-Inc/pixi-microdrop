@@ -489,6 +489,25 @@ def select_full_install_names(target):
     return sorted(name for name in target if not STRIPPED_PACKAGE_REGEX.match(name))
 
 
+def select_held_back_names(target, base, install_names):
+    """The install candidates micromamba cannot install into the base.
+
+    A package that depends on a stripped toolchain package the base lacks
+    (clang-helpers on clang, conda-helpers on git) fails micromamba's solve
+    once it has to change: the toolchain is in no channel. Such packages keep
+    their installed version, as they did in the slim pack.
+    """
+
+    return sorted(
+        name
+        for name in install_names
+        if any(
+            STRIPPED_PACKAGE_REGEX.match(dependency) and dependency not in base
+            for dependency in (depend.split()[0] for depend in target[name].depends)
+        )
+    )
+
+
 def select_update_packages(target, base, install_names):
     """The packages the bundle's channel must carry.
 
@@ -749,6 +768,7 @@ def build_manifest(
     channel,
     pypi=(),
     full=False,
+    held_back=(),
 ):
     """The ``update.json`` content.
 
@@ -763,6 +783,9 @@ def build_manifest(
         Every package the bundle's channel carries.
     pypi
         The PyPI packages whose wheels the bundle ships and installs.
+    held_back
+        The changed packages left at their installed version, as
+        `select_held_back_names` explains.
     """
 
     return {
@@ -785,6 +808,7 @@ def build_manifest(
             if STRIPPED_PACKAGE_REGEX.match(package.name)
         ],
         "pypi": [pypi_spec(package) for package in pypi],
+        "held_back": [package_spec(package) for package in held_back],
         "channel": [
             {
                 "name": package.name,
@@ -844,25 +868,38 @@ def build_update(platform, environment, base_paths=(), lock_path=None, full=Fals
         target_pypi[name] = build_path_wheel(target_pypi[name], wheel_build)
 
     install_names = set()
-    selected = set()
+    held_back = set()
     pypi_names = set()
 
+    # A full update cannot know the base, so it holds back as for a slim one.
     if full:
         install_names.update(select_full_install_names(target))
-        selected.update(select_update_packages(target, {}, install_names))
+        held_back.update(select_held_back_names(target, {}, install_names))
         pypi_names.update(target_pypi)
 
     # The bundle covers every base: install the union of what each one lacks,
-    # and ship the union of what each one needs.
+    # less the union of what any one cannot take.
     for _, base, base_pypi, _ in bases:
         names = select_install_names(target, base)
         install_names.update(names)
-        selected.update(select_update_packages(target, base, names))
+        held_back.update(select_held_back_names(target, base, names))
         pypi_names.update(select_pypi_names(target_pypi, base_pypi))
 
+    install_names -= held_back
+    selected = set()
+
+    for base in [base for _, base, _, _ in bases] or [{}]:
+        selected.update(select_update_packages(target, base, install_names))
+
     install = [target[name] for name in sorted(install_names)]
-    selected = sorted(selected)
+    selected = sorted(package for package in selected if package.name not in held_back)
     pypi = [target_pypi[name] for name in sorted(pypi_names)]
+
+    if held_back:
+        print(
+            f"WARNING: holding back {', '.join(sorted(held_back))}: they need "
+            f"toolchain packages stripped from slim installs"
+        )
 
     date = datetime.date.today().isoformat()
     folder_name = f"microdrop-update-{date}-{platform}"
@@ -906,6 +943,7 @@ def build_update(platform, environment, base_paths=(), lock_path=None, full=Fals
         selected,
         pypi,
         full,
+        [target[name] for name in sorted(held_back)],
     )
     write_manifest(folder, manifest)
 
