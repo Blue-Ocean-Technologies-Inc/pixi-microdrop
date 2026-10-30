@@ -90,6 +90,12 @@ CONDA_SUFFIXES = (".conda", ".tar.bz2")
 
 SCRIPTS = ("apply-update.bat", "fix-conda-meta.py")
 
+#: Longest path a bundle may hold relative to where it is extracted:
+#: Explorer's "Extract All" nests the ``update-<date>`` folder inside one
+#: named after the zip, under a MicroDrop folder that may itself take ~100
+#: of Windows' 260 characters (``C:\Users\<name>\OneDrive - <Company>\...``).
+MAX_EXTRACTED_PATH = 160
+
 #: The MicroDrop app's PyPI name. A git hand-off has no such wheel installed:
 #: it links the clone through ``MICRODROP_GIT_PTH`` in site-packages.
 MICRODROP_DIST = "microdrop-py"
@@ -702,8 +708,12 @@ def index_channel(channel, platform):
     )
 
     # micromamba reads both subdirs of a channel; one without packages still
-    # needs an (empty) index.
+    # needs an (empty) index. The sharded index is only for rattler clients,
+    # and its hash-named shards would lengthen the bundle's deepest paths.
     for subdir in (platform, "noarch"):
+        shutil.rmtree(channel / subdir / "shards", ignore_errors=True)
+        (channel / subdir / "repodata_shards.msgpack.zst").unlink(missing_ok=True)
+
         repodata = channel / subdir / "repodata.json"
 
         if not repodata.exists():
@@ -843,26 +853,48 @@ def describe_microdrop(pypi):
 
 
 def bundle_name(date, platform, environment, base_paths):
-    """Name the bundle for the hand-off it updates.
+    """Name the bundle's zip for the hand-off it updates.
 
     Bundles built the same day must not overwrite each other: one built for
     a single hand-off zip is named after it (the AI, no-AI and git hand-offs
-    are all distinct), any other after the platform and AI variant.
+    are all distinct), less the platform it shares with every hand-off; any
+    other after the platform and AI variant. The folder inside the zip is
+    always the short `bundle_folder_name`, to keep extracted paths short.
 
     Returns
     -------
     tuple
-        (bundle folder name, the hand-off as the README names it)
+        (zip stem, the hand-off as the README names it)
     """
 
     if len(base_paths) == 1 and base_paths[0].suffix == ".zip":
         handoff = base_paths[0].stem.removeprefix("share-microdrop-")
+        handoff = handoff.replace(f"-{platform}", "")
 
-        return f"microdrop-update-{date}-for-{handoff}", base_paths[0].name
+        return f"microdrop-update-{date}-{handoff}", base_paths[0].name
 
     variant = handoff_variant("no-ai" not in environment)
 
     return f"microdrop-update-{date}-{platform}-{variant}", f"{platform} {variant}"
+
+
+def bundle_folder_name(date):
+    """The single top-level folder inside every bundle zip."""
+
+    return f"update-{date}"
+
+
+def longest_extracted_path(zip_path):
+    """The longest path, in characters, of a zip extracted by Explorer.
+
+    "Extract All" puts the zip's contents in a folder named after it, so
+    each member's path is counted below the zip stem.
+    """
+
+    with zipfile.ZipFile(zip_path) as archive:
+        names = archive.namelist()
+
+    return max(len(f"{Path(zip_path).stem}/{name}") for name in names)
 
 
 def build_update(platform, environment, base_paths=(), lock_path=None, full=False):
@@ -933,8 +965,9 @@ def build_update(platform, environment, base_paths=(), lock_path=None, full=Fals
         )
 
     date = datetime.date.today().isoformat()
-    folder_name, handoff = bundle_name(date, platform, environment, base_paths)
-    folder = DIST / "share" / folder_name
+    zip_stem, handoff = bundle_name(date, platform, environment, base_paths)
+    folder_name = bundle_folder_name(date)
+    folder = DIST / "share" / zip_stem
 
     if folder.exists():
         shutil.rmtree(folder)
@@ -996,7 +1029,7 @@ def build_update(platform, environment, base_paths=(), lock_path=None, full=Fals
     )
     write_windows_text(folder / "README.txt", readme)
 
-    zip_path = DIST / f"{folder_name}.zip"
+    zip_path = DIST / f"{zip_stem}.zip"
 
     # Fastest deflate level, as for the hand-offs: the payload is mostly
     # already-compressed package archives.
@@ -1005,6 +1038,14 @@ def build_update(platform, environment, base_paths=(), lock_path=None, full=Fals
     ) as archive:
         for path in sorted(folder.rglob("*")):
             archive.write(path, Path(folder_name) / path.relative_to(folder))
+
+    longest = longest_extracted_path(zip_path)
+
+    if longest > MAX_EXTRACTED_PATH:
+        raise SystemExit(
+            f"{zip_path.name} holds a {longest}-character path once extracted, "
+            f"over the {MAX_EXTRACTED_PATH} that keeps it under Windows' 260"
+        )
 
     print(f"folder: {folder}")
     print(f"zip:    {zip_path} ({zip_path.stat().st_size / 1e6:.0f} MB)")

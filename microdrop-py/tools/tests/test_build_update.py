@@ -608,11 +608,11 @@ def test_bundle_name_follows_a_single_hand_off_zip():
     no_ai_zip = Path("share-microdrop-1.23.0-win-64-no-AI.zip")
 
     assert bu.bundle_name("2026-10-30", "win-64", "prod", [git_zip]) == (
-        "microdrop-update-2026-10-30-for-git-v1.24.2-8-g684be6ba-win-64",
+        "microdrop-update-2026-10-30-git-v1.24.2-8-g684be6ba",
         git_zip.name,
     )
     assert bu.bundle_name("2026-10-30", "win-64", "prod-no-ai", [no_ai_zip]) == (
-        "microdrop-update-2026-10-30-for-1.23.0-win-64-no-AI",
+        "microdrop-update-2026-10-30-1.23.0-no-AI",
         no_ai_zip.name,
     )
 
@@ -626,6 +626,15 @@ def test_bundle_name_follows_a_single_hand_off_zip():
     assert bu.bundle_name("2026-10-30", "win-64", "prod-no-ai", [])[0] == (
         "microdrop-update-2026-10-30-win-64-no-AI"
     )
+
+    # No default name is longer than a hand-off's: they share a path budget.
+    names = [
+        bu.bundle_name("2026-10-30", "win-64", environment, bases)[0]
+        for environment in ("prod", "prod-no-ai")
+        for bases in ([git_zip], [no_ai_zip], [])
+    ]
+
+    assert all(len(name) <= len(names[0]) for name in names)
 
 
 def test_write_manifest_writes_the_spec_lists(tmp_path, lock_path):
@@ -734,9 +743,9 @@ def test_build_update_smoke(tmp_path, fake_dist, lock_path):
     zip_path = bu.build_update("win-64", "prod", [pack_path], lock_path)
 
     folder = bundle_folder(dist)
-    folder_name = folder.name
+    folder_name = f"update-{datetime.date.today()}"
 
-    assert zip_path == dist / f"{folder_name}.zip"
+    assert zip_path == dist / f"{folder.name}.zip"
 
     # The indexer is stubbed, so both indexes are the empty fallbacks.
     assert bundle_files(dist, "channel") == [
@@ -806,12 +815,27 @@ def test_build_update_smoke(tmp_path, fake_dist, lock_path):
     assert f"{folder_name}/apply-update.bat" in names
     assert f"{folder_name}/channel/noarch/sympy-1.14.0-pyh2585a3b_105.conda" in names
     assert f"{folder_name}/wheels/microdrop_py-1.33.0-py3-none-any.whl" in names
+    assert {name.split("/")[0] for name in names} == {folder_name}
+
+    # Explorer's worst case - the zip-named folder, the bundle folder and the
+    # deepest file - must leave room for the MicroDrop folder within 260.
+    assert bu.longest_extracted_path(zip_path) <= bu.MAX_EXTRACTED_PATH
 
     # A second build reuses the verified cache instead of downloading again.
     downloads.clear()
     bu.build_update("win-64", "prod", [pack_path], lock_path)
 
     assert downloads == []
+
+
+def test_build_update_refuses_a_bundle_too_deep_to_extract(
+    tmp_path, fake_dist, lock_path, monkeypatch
+):
+    pack_path = write_pack(tmp_path / "microdrop-prod-slim-win-64.tar")
+    monkeypatch.setattr(bu, "MAX_EXTRACTED_PATH", 100)
+
+    with pytest.raises(SystemExit, match="character path once extracted"):
+        bu.build_update("win-64", "prod", [pack_path], lock_path)
 
 
 def test_build_update_covers_the_union_of_several_bases(tmp_path, fake_dist, lock_path):
