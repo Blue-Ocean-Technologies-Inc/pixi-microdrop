@@ -47,8 +47,8 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.1.0-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.1.0-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.2.3-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.2.3-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -486,8 +486,8 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.1.0-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.1.0-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.2.3-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.2.3-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -887,8 +887,8 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.1.0-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.1.0-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.2.3-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.2.3-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -1315,8 +1315,8 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.1.0-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.1.0-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.2.3-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.2.3-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -4523,8 +4523,8 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.1.0-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.1.0-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.2.3-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.2.3-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -4961,8 +4961,8 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.1.0-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.1.0-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.2.3-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.2.3-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -5361,8 +5361,8 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.1.0-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.1.0-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.2.3-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.2.3-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -5788,8 +5788,8 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.1.0-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.1.0-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.2.3-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.2.3-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -6345,29 +6345,29 @@ packages:
   md5: c3dd603cdc3663c0e8af5c494ca873b7
   size: 76301
   timestamp: 1772521659783
-- conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.1.0-py_0.conda
-  sha256: 20f404962b6fef3af67a6fd0dea53001b06093e1fb8a6ac4d55bedcf0acff838
-  md5: e3578cb9830a2f45886d026b21408a12
+- conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.2.3-py_0.conda
+  sha256: 57a1df61fd9f44728479051fa17e9f78aec0ff99402366bd7042ac60c9f4b581
+  md5: de3b22c0878aec1fa6723b68d0357f52
   depends:
   - numpy
   - pyserial
   - python >=3.11
   - tqdm
   license: Proprietary
-  size: 327770
-  timestamp: 1793337780041
-- conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.1.0-py_0.conda
-  sha256: dc3b44271598cfa62e4f33c4f18892e00d85526fe4fe7e0af186d49d40788504
-  md5: 7e5aca33bb7b6c07abbd2a9e31bdb278
+  size: 418207
+  timestamp: 1793899251438
+- conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.2.3-py_0.conda
+  sha256: 610ac685117ebfe0ef79ea1eeca41b3525f3f4488d5cc25e92893c2196a163c0
+  md5: 4875274dddff8bea9108824ee7758956
   depends:
-  - dropbot-portable 1.1.0.*
+  - dropbot-portable 1.2.3.*
   - pyqtgraph >=0.11
   - python >=3.11
   constrains:
   - pyside6 >=6.8
   license: Proprietary
-  size: 99465
-  timestamp: 1793337888212
+  size: 226669
+  timestamp: 1793899367596
 - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
   sha256: 5f267428274e4c4ebc69a026fa51421a056fef480f6baeca8000a2829d16a6a1
   md5: 9fd60c9fc8bed18787b0dd93b307442c
@@ -7588,7 +7588,7 @@ packages:
   license: BSD-3-Clause
   license_family: BSD
   purls:
-  - pkg:pypi/kiwisolver?source=compressed-mapping
+  - pkg:pypi/kiwisolver?source=hash-mapping
   run_exports: {}
   size: 75215
   timestamp: 1788505643992
@@ -9381,7 +9381,7 @@ packages:
   license: BSD-3-Clause
   license_family: BSD
   purls:
-  - pkg:pypi/numpy?source=compressed-mapping
+  - pkg:pypi/numpy?source=hash-mapping
   run_exports:
     weak:
     - numpy >=1.25,<3
@@ -10882,7 +10882,7 @@ packages:
   license: MIT
   license_family: MIT
   purls:
-  - pkg:pypi/brotli?source=compressed-mapping
+  - pkg:pypi/brotli?source=hash-mapping
   run_exports: {}
   size: 366485
   timestamp: 1788480367792
@@ -14982,7 +14982,7 @@ packages:
   license: BSD-3-Clause
   license_family: BSD
   purls:
-  - pkg:pypi/flexcache?source=compressed-mapping
+  - pkg:pypi/flexcache?source=hash-mapping
   run_exports: {}
   size: 18768
   timestamp: 1788605834431
@@ -14997,7 +14997,7 @@ packages:
   license: BSD-3-Clause
   license_family: BSD
   purls:
-  - pkg:pypi/flexparser?source=compressed-mapping
+  - pkg:pypi/flexparser?source=hash-mapping
   run_exports: {}
   size: 30745
   timestamp: 1788605800152
@@ -16312,7 +16312,7 @@ packages:
   license: MIT
   license_family: MIT
   purls:
-  - pkg:pypi/rich-toolkit?source=compressed-mapping
+  - pkg:pypi/rich-toolkit?source=hash-mapping
   run_exports: {}
   size: 37486
   timestamp: 1788918484806
