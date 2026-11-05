@@ -1517,6 +1517,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/clang-22.1.8-default_nocfg_hbb9487a_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/clangdev-8.0.0-h1ad3211_2.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/compiler-rt22-22.1.8-h49e36cd_2.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/comtypes-1.4.16-py313hfa70ccb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/contourpy-1.4.0-py313h1a38498_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/cryptography-50.0.1-py311h67a9792_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/fastar-0.12.0-py313h633daaa_0.conda
@@ -2951,6 +2952,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/clang-22.1.8-default_nocfg_hbb9487a_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/clangdev-8.0.0-h1ad3211_2.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/compiler-rt22-22.1.8-h49e36cd_2.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/comtypes-1.4.16-py313hfa70ccb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/contourpy-1.4.0-py313h1a38498_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/cryptography-50.0.1-py311h67a9792_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/ffmpeg-9.0.1-gpl_hfba0be1_902.conda
@@ -4361,6 +4363,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/clang-22.1.8-default_nocfg_hbb9487a_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/clangdev-8.0.0-h1ad3211_2.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/compiler-rt22-22.1.8-h49e36cd_2.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/comtypes-1.4.16-py313hfa70ccb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/contourpy-1.4.0-py313h1a38498_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/cryptography-50.0.1-py311h67a9792_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/ffmpeg-9.0.1-gpl_hfba0be1_902.conda
@@ -5987,6 +5990,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/clang-22.1.8-default_nocfg_hbb9487a_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/clangdev-8.0.0-h1ad3211_2.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/compiler-rt22-22.1.8-h49e36cd_2.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/comtypes-1.4.16-py313hfa70ccb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/contourpy-1.4.0-py313h1a38498_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/cryptography-50.0.1-py311h67a9792_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/fastar-0.12.0-py313h633daaa_0.conda
@@ -20403,7 +20407,7 @@ packages:
   - zstd >=1.5.7,<1.6.0a0
   license: BSD-3-Clause AND MIT AND EPL-2.0
   purls:
-  - pkg:pypi/backports-zstd?source=compressed-mapping
+  - pkg:pypi/backports-zstd?source=hash-mapping
   run_exports: {}
   size: 242878
   timestamp: 1788491289149
@@ -20644,6 +20648,19 @@ packages:
   run_exports: {}
   size: 4077720
   timestamp: 1787293981528
+- conda: https://conda.anaconda.org/conda-forge/win-64/comtypes-1.4.16-py313hfa70ccb_0.conda
+  sha256: f73a8e7694ccaa75ca52cfee79cabadfc0bf8b2a4ecc3c0f52a240b32ab7318d
+  md5: 764e495a7ced534556bdd8952b438aa4
+  depends:
+  - python >=3.13,<3.14.0a0
+  - python_abi 3.13.* *_cp313
+  license: MIT
+  license_family: MIT
+  purls:
+  - pkg:pypi/comtypes?source=hash-mapping
+  run_exports: {}
+  size: 632642
+  timestamp: 1776006314119
 - conda: https://conda.anaconda.org/conda-forge/win-64/contourpy-1.4.0-py313h1a38498_0.conda
   sha256: 9f89c91518981657e7e4228d7c4a7b6da907fecad9b8cf9796bfd46743da9ef7
   md5: 03a11324d1765a2b5f69937a4125d8fe
@@ -22172,7 +22189,7 @@ packages:
   license: BSD-3-Clause
   license_family: BSD
   purls:
-  - pkg:pypi/numpy?source=compressed-mapping
+  - pkg:pypi/numpy?source=hash-mapping
   run_exports:
     weak:
     - numpy >=1.25,<3
