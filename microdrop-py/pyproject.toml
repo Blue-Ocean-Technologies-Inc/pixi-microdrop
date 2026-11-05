@@ -179,6 +179,9 @@ prod-no-ai = { features = ["plugins", "prod-plugins"], solve-group = "default" }
 [tool.pixi.target.win-64.dependencies]
 ntfsutils = ">=0.1.5,<0.2"
 redis-server = ">=3.0.501,<4"
+# DirectShow camera controls: lens focus and image controls where Qt's
+# Windows backend has none (Camera Properties window).
+comtypes = ">=1.4,<2"
 # conda-forge defaults numpy/scipy to Intel MKL on Windows only: ~540 MB
 # installed for math the app barely exercises. OpenBLAS is ~40 MB and is
 # already what Linux and macOS resolve to.
