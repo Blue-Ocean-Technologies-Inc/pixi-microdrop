@@ -463,6 +463,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/wsproto-1.3.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.2.1-pyh4616a5c_0.conda
+      - pypi: ../gst-system-pango-preload
       - pypi: ../pyside6-icu-preload
       - pypi: ./
       - pypi: https://files.pythonhosted.org/packages/17/fe/d5c67665f866b8859d02aa1a859f101a1b2fd348cb61746a3e16fd98fb20/pyside6_addons-6.9.3-cp39-abi3-manylinux_2_28_x86_64.whl
@@ -864,6 +865,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.25.0-py313h2f871a8_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.7-hf451053_7.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.2.1-pyh4616a5c_0.conda
+      - pypi: ../gst-system-pango-preload
       - pypi: ../pyside6-icu-preload
       - pypi: ./
       - pypi: https://files.pythonhosted.org/packages/47/44/11bf71c36e71936ab4e923e5dd23599dab527c4488b01860b0f689ce9947/shiboken6-6.11.2-cp310-abi3-macosx_13_0_universal2.whl
@@ -1292,6 +1294,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/wsproto-1.3.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.2.1-pyh4616a5c_0.conda
+      - pypi: ../gst-system-pango-preload
       - pypi: ../pyside6-icu-preload
       - pypi: ./
       - pypi: https://files.pythonhosted.org/packages/11/bd/f725a8984703612c72cd17d0871d047132bacaccc13fc0d288a5e8a37dad/pyside6_addons-6.11.2-cp310-abi3-manylinux_2_39_aarch64.whl
@@ -1651,6 +1654,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.7-h534d264_7.conda
       - conda: https://conda.anaconda.org/vignesh229/win-64/redis-server-3.0.501-0.tar.bz2
       - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.2.1-pyh4616a5c_0.conda
+      - pypi: ../gst-system-pango-preload
       - pypi: ../pyside6-icu-preload
       - pypi: ./
       - pypi: https://files.pythonhosted.org/packages/94/fe/4aea9d30300fff4cda9bb729c1363b9e1095a8544e0d6b57065465e16599/pyside6-6.11.2-cp310-abi3-win_amd64.whl
@@ -2042,6 +2046,7 @@ environments:
       - conda: https://prefix.dev/microdrop-plugins/noarch/fluorescence-microdrop-plugin-3.8.0-pyh4616a5c_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/heater-microdrop-plugin-1.13.0-pyh4616a5c_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.2.1-pyh4616a5c_0.conda
+      - pypi: ../gst-system-pango-preload
       - pypi: ../pyside6-icu-preload
       - pypi: ./
       - pypi: https://files.pythonhosted.org/packages/0c/29/0348de65b8cc732daa3e33e67806420b2ae89bdce2b04af740289c5c6c8c/loguru-0.7.3-py3-none-any.whl
@@ -2389,6 +2394,7 @@ environments:
       - conda: https://prefix.dev/microdrop-plugins/noarch/fluorescence-microdrop-plugin-3.8.0-pyh4616a5c_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/heater-microdrop-plugin-1.13.0-pyh4616a5c_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.2.1-pyh4616a5c_0.conda
+      - pypi: ../gst-system-pango-preload
       - pypi: ../pyside6-icu-preload
       - pypi: ./
       - pypi: https://files.pythonhosted.org/packages/0c/29/0348de65b8cc732daa3e33e67806420b2ae89bdce2b04af740289c5c6c8c/loguru-0.7.3-py3-none-any.whl
@@ -2771,6 +2777,7 @@ environments:
       - conda: https://prefix.dev/microdrop-plugins/noarch/fluorescence-microdrop-plugin-3.8.0-pyh4616a5c_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/heater-microdrop-plugin-1.13.0-pyh4616a5c_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.2.1-pyh4616a5c_0.conda
+      - pypi: ../gst-system-pango-preload
       - pypi: ../pyside6-icu-preload
       - pypi: ./
       - pypi: https://files.pythonhosted.org/packages/0c/29/0348de65b8cc732daa3e33e67806420b2ae89bdce2b04af740289c5c6c8c/loguru-0.7.3-py3-none-any.whl
@@ -3080,6 +3087,7 @@ environments:
       - conda: https://prefix.dev/microdrop-plugins/noarch/fluorescence-microdrop-plugin-3.8.0-pyh4616a5c_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/heater-microdrop-plugin-1.13.0-pyh4616a5c_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.2.1-pyh4616a5c_0.conda
+      - pypi: ../gst-system-pango-preload
       - pypi: ../pyside6-icu-preload
       - pypi: ./
       - pypi: https://files.pythonhosted.org/packages/0c/29/0348de65b8cc732daa3e33e67806420b2ae89bdce2b04af740289c5c6c8c/loguru-0.7.3-py3-none-any.whl
@@ -3481,6 +3489,7 @@ environments:
       - conda: https://prefix.dev/microdrop-plugins/noarch/fluorescence-microdrop-plugin-3.8.0-pyh4616a5c_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/heater-microdrop-plugin-1.13.0-pyh4616a5c_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.2.1-pyh4616a5c_0.conda
+      - pypi: ../gst-system-pango-preload
       - pypi: ../pyside6-icu-preload
       - pypi: ./
       - pypi: https://files.pythonhosted.org/packages/17/fe/d5c67665f866b8859d02aa1a859f101a1b2fd348cb61746a3e16fd98fb20/pyside6_addons-6.9.3-cp39-abi3-manylinux_2_28_x86_64.whl
@@ -3820,6 +3829,7 @@ environments:
       - conda: https://prefix.dev/microdrop-plugins/noarch/fluorescence-microdrop-plugin-3.8.0-pyh4616a5c_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/heater-microdrop-plugin-1.13.0-pyh4616a5c_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.2.1-pyh4616a5c_0.conda
+      - pypi: ../gst-system-pango-preload
       - pypi: ../pyside6-icu-preload
       - pypi: ./
       - pypi: https://files.pythonhosted.org/packages/47/44/11bf71c36e71936ab4e923e5dd23599dab527c4488b01860b0f689ce9947/shiboken6-6.11.2-cp310-abi3-macosx_13_0_universal2.whl
@@ -4190,6 +4200,7 @@ environments:
       - conda: https://prefix.dev/microdrop-plugins/noarch/fluorescence-microdrop-plugin-3.8.0-pyh4616a5c_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/heater-microdrop-plugin-1.13.0-pyh4616a5c_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.2.1-pyh4616a5c_0.conda
+      - pypi: ../gst-system-pango-preload
       - pypi: ../pyside6-icu-preload
       - pypi: ./
       - pypi: https://files.pythonhosted.org/packages/11/bd/f725a8984703612c72cd17d0871d047132bacaccc13fc0d288a5e8a37dad/pyside6_addons-6.11.2-cp310-abi3-manylinux_2_39_aarch64.whl
@@ -4491,6 +4502,7 @@ environments:
       - conda: https://prefix.dev/microdrop-plugins/noarch/fluorescence-microdrop-plugin-3.8.0-pyh4616a5c_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/heater-microdrop-plugin-1.13.0-pyh4616a5c_0.conda
       - conda: https://prefix.dev/microdrop-plugins/noarch/magnet-microdrop-plugin-1.2.1-pyh4616a5c_0.conda
+      - pypi: ../gst-system-pango-preload
       - pypi: ../pyside6-icu-preload
       - pypi: ./
       - pypi: https://files.pythonhosted.org/packages/94/fe/4aea9d30300fff4cda9bb729c1363b9e1095a8544e0d6b57065465e16599/pyside6-6.11.2-cp310-abi3-win_amd64.whl
@@ -4938,6 +4950,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/whichcraft-0.6.1-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/wsproto-1.3.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
+      - pypi: ../gst-system-pango-preload
       - pypi: ../pyside6-icu-preload
       - pypi: ./
       - pypi: https://files.pythonhosted.org/packages/17/fe/d5c67665f866b8859d02aa1a859f101a1b2fd348cb61746a3e16fd98fb20/pyside6_addons-6.9.3-cp39-abi3-manylinux_2_28_x86_64.whl
@@ -5338,6 +5351,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-ng-2.3.3-h31dac16_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.25.0-py313h2f871a8_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.7-hf451053_7.conda
+      - pypi: ../gst-system-pango-preload
       - pypi: ../pyside6-icu-preload
       - pypi: ./
       - pypi: https://files.pythonhosted.org/packages/47/44/11bf71c36e71936ab4e923e5dd23599dab527c4488b01860b0f689ce9947/shiboken6-6.11.2-cp310-abi3-macosx_13_0_universal2.whl
@@ -5765,6 +5779,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/whichcraft-0.6.1-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/wsproto-1.3.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
+      - pypi: ../gst-system-pango-preload
       - pypi: ../pyside6-icu-preload
       - pypi: ./
       - pypi: https://files.pythonhosted.org/packages/11/bd/f725a8984703612c72cd17d0871d047132bacaccc13fc0d288a5e8a37dad/pyside6_addons-6.11.2-cp310-abi3-manylinux_2_39_aarch64.whl
@@ -6123,6 +6138,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.25.0-py313h5fd188c_4.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.7-h534d264_7.conda
       - conda: https://conda.anaconda.org/vignesh229/win-64/redis-server-3.0.501-0.tar.bz2
+      - pypi: ../gst-system-pango-preload
       - pypi: ../pyside6-icu-preload
       - pypi: ./
       - pypi: https://files.pythonhosted.org/packages/94/fe/4aea9d30300fff4cda9bb729c1363b9e1095a8544e0d6b57065465e16599/pyside6-6.11.2-cp310-abi3-win_amd64.whl
@@ -23019,6 +23035,9 @@ packages:
   run_exports: {}
   size: 34365
   timestamp: 1788301138269
+- pypi: ../gst-system-pango-preload
+  name: gst-system-pango-preload
+  requires_python: '>=3.8'
 - pypi: ../pyside6-icu-preload
   name: pyside6-icu-preload
   requires_python: '>=3.8'
