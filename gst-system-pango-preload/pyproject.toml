@@ -1,0 +1,18 @@
+[project]
+name = "gst-system-pango-preload"
+version = "0.1.0"
+description = "Preload Linux's system Pango stack so system GStreamer's libav plugin loads inside conda environments."
+requires-python = ">= 3.8"
+
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+# No package directory: the wheel ships only a top-level module plus the .pth
+# that imports it at interpreter startup.
+[tool.hatch.build.targets.wheel]
+bypass-selection = true
+
+[tool.hatch.build.targets.wheel.force-include]
+"gst_system_pango_preload.py" = "gst_system_pango_preload.py"
+"gst_system_pango_preload.pth" = "gst_system_pango_preload.pth"

@@ -41,6 +41,11 @@ microdrop_py = { path = ".", editable = true }
 # icu puts a same-named, incompatible one first on the DLL search path. This
 # installs a .pth that preloads the system copy at interpreter startup.
 pyside6-icu-preload = { path = "../pyside6-icu-preload" }
+# Linux: system GStreamer's libav plugin (the only H.264 decoder) resolves its
+# Pango dependency to conda's copy, which needs a newer fontconfig than the
+# system one Qt already loaded, so the plugin fails to load. This installs a
+# .pth that preloads the system Pango stack at interpreter startup.
+gst-system-pango-preload = { path = "../gst-system-pango-preload" }
 
 # Ship every package under src/ automatically (`sources` strips the src/
 # prefix, so src/foo installs as foo). New packages are picked up without
@@ -210,11 +215,11 @@ microdrop-frontend = { cmd = "python run_device_viewer_pluggable_frontend.py", c
 microdrop-backend = { cmd = "python run_device_viewer_pluggable_backend.py", cwd = "src/examples/" }
 run_redis = { cmd = "python start_redis_server.py", cwd = "src/examples/" }
 # pixi-pack only accepts wheels for PyPI dependencies, and the two path
-# dependencies above (the editable workspace, the ICU preload) are source
+# dependencies above (the editable workspace, the ICU and Pango preloads) are source
 # trees. Build them as wheels, skip the source entries, inject the wheels.
 # Usage: `pixi run pack-prod win-64` -> dist/microdrop-prod-win-64.tar
-build-wheels = { cmd = "rm -rf dist/wheels && pixi exec uv build --wheel -o dist/wheels . && pixi exec uv build --wheel -o dist/wheels ../pyside6-icu-preload" }
-pack-prod = { cmd = "pixi exec pixi-pack --environment {{ environment }} --platform {{ platform }} --ignore-pypi-non-wheel --use-cache dist/pack-cache --inject dist/wheels/microdrop_py-*.whl --inject dist/wheels/pyside6_icu_preload-*.whl -o dist/microdrop-{{ environment }}-{{ platform }}.tar", args = ["platform", { arg = "environment", default = "prod" }], depends-on = ["build-wheels"] }
+build-wheels = { cmd = "rm -rf dist/wheels && pixi exec uv build --wheel -o dist/wheels . && pixi exec uv build --wheel -o dist/wheels ../pyside6-icu-preload && pixi exec uv build --wheel -o dist/wheels ../gst-system-pango-preload" }
+pack-prod = { cmd = "pixi exec pixi-pack --environment {{ environment }} --platform {{ platform }} --ignore-pypi-non-wheel --use-cache dist/pack-cache --inject dist/wheels/microdrop_py-*.whl --inject dist/wheels/pyside6_icu_preload-*.whl --inject dist/wheels/gst_system_pango_preload-*.whl -o dist/microdrop-{{ environment }}-{{ platform }}.tar", args = ["platform", { arg = "environment", default = "prod" }], depends-on = ["build-wheels"] }
 # The pack minus the firmware build toolchain (clang, git) that the DropBot
 # driver chain declares as run dependencies — see tools/prune_pack.py.
 # Usage: `pixi run pack-prod-slim win-64` -> dist/microdrop-prod-slim-win-64.tar
@@ -247,10 +252,13 @@ share-prod-all = { args = [{ arg = "platform", default = "win-64" }], depends-on
 # git: the same offline prod pack (AI included), but MicroDrop ships as a git
 # clone of Microdrop main instead of a wheel, so the user pulls every update
 # pushed to main with update-microdrop.bat — see tools/build_share_git.py.
-# The pack carries no MicroDrop wheel (only the ICU preload) and keeps git.
+# The pack carries no MicroDrop wheel (only the ICU and Pango preloads) and
+# keeps git.
 # Usage: `pixi run share-prod-git` -> dist/share-microdrop-git-<describe>-win-64.zip
 build-icu-wheel = { cmd = "rm -rf dist/wheels-git && pixi exec uv build --wheel -o dist/wheels-git ../pyside6-icu-preload" }
-pack-prod-git = { cmd = "pixi exec pixi-pack --environment prod --platform {{ platform }} --ignore-pypi-non-wheel --use-cache dist/pack-cache --inject dist/wheels-git/pyside6_icu_preload-*.whl -o dist/microdrop-prod-git-{{ platform }}.tar", args = ["platform"], depends-on = ["build-icu-wheel"] }
+# Chained after build-icu-wheel, whose rm -rf would otherwise wipe this wheel.
+build-gst-preload-wheel = { cmd = "pixi exec uv build --wheel -o dist/wheels-git ../gst-system-pango-preload", depends-on = ["build-icu-wheel"] }
+pack-prod-git = { cmd = "pixi exec pixi-pack --environment prod --platform {{ platform }} --ignore-pypi-non-wheel --use-cache dist/pack-cache --inject dist/wheels-git/pyside6_icu_preload-*.whl --inject dist/wheels-git/gst_system_pango_preload-*.whl -o dist/microdrop-prod-git-{{ platform }}.tar", args = ["platform"], depends-on = ["build-gst-preload-wheel"] }
 pack-prod-git-slim = { cmd = "python tools/prune_pack.py dist/microdrop-prod-git-{{ platform }}.tar dist/microdrop-prod-git-slim-{{ platform }}.tar --keep git", args = ["platform"], depends-on = [{ task = "pack-prod-git", args = ["{{ platform }}"] }] }
 share-prod-git = { cmd = "python tools/build_share_git.py {{ platform }}", args = [{ arg = "platform", default = "win-64" }], depends-on = [{ task = "pack-prod-git-slim", args = ["{{ platform }}"] }] }
 # Once the zips are built the rest of dist/ (full and slim packs, wheels, the
@@ -261,4 +269,4 @@ clean-dist = { cmd = "python tools/clean_dist.py" }
 # binary. Linux/macOS only (.sh): the win-64 .ps1 embeds the ~1.2 GB archive
 # as base64 text and PowerShell fails to load it ("An error occurred while
 # creating the pipeline") — ship the .tar plus pixi-unpack.exe on Windows.
-pack-prod-exe = { cmd = "pixi exec pixi-pack --environment {{ environment }} --platform {{ platform }} --ignore-pypi-non-wheel --use-cache dist/pack-cache --inject dist/wheels/microdrop_py-*.whl --inject dist/wheels/pyside6_icu_preload-*.whl --create-executable -o dist/microdrop-{{ environment }}-{{ platform }}", args = ["platform", { arg = "environment", default = "prod" }], depends-on = ["build-wheels"] }
+pack-prod-exe = { cmd = "pixi exec pixi-pack --environment {{ environment }} --platform {{ platform }} --ignore-pypi-non-wheel --use-cache dist/pack-cache --inject dist/wheels/microdrop_py-*.whl --inject dist/wheels/pyside6_icu_preload-*.whl --inject dist/wheels/gst_system_pango_preload-*.whl --create-executable -o dist/microdrop-{{ environment }}-{{ platform }}", args = ["platform", { arg = "environment", default = "prod" }], depends-on = ["build-wheels"] }
