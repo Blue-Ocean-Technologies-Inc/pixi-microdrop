@@ -1,3 +1,9 @@
+## [v0.8.1](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.8.1) (2026-11-09)
+
+### Fix
+
+- **env**: preload system Pango so GStreamer libav loads on the Pi ([`8349d99`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/8349d995ef6031d3965f5585cb3983f6d4fcc0e0))
+
 ## [v0.8.0](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.8.0) (2026-10-30)
 
 ### Feat
