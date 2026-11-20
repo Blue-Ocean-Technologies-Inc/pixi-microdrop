@@ -47,8 +47,8 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.6.1-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.6.1-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.7.0-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.7.0-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -487,8 +487,8 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.6.1-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.6.1-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.7.0-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.7.0-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -889,8 +889,8 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.6.1-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.6.1-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.7.0-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.7.0-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -1318,8 +1318,8 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.6.1-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.6.1-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.7.0-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.7.0-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -4535,8 +4535,8 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.6.1-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.6.1-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.7.0-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.7.0-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -4974,8 +4974,8 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.6.1-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.6.1-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.7.0-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.7.0-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -5375,8 +5375,8 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.6.1-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.6.1-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.7.0-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.7.0-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -5803,8 +5803,8 @@ environments:
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-1.74.4-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-dev-1.74.4-0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-headers-0.1-0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.6.1-py_0.conda
-      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.6.1-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.7.0-py_0.conda
+      - conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.7.0-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
       - conda: https://conda.anaconda.org/alexsk/noarch/json-tricks-3.17.3-py_0.tar.bz2
       - conda: https://conda.anaconda.org/alexsk/noarch/mpremote-1.25.0-py_0.tar.bz2
@@ -6361,29 +6361,30 @@ packages:
   md5: c3dd603cdc3663c0e8af5c494ca873b7
   size: 76301
   timestamp: 1772521659783
-- conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.6.1-py_0.conda
-  sha256: b47da5de832faa67249fae60c4bf18ba8aba7196526d6f133bd5ba3447b36fb7
-  md5: c5c8d4c3ea262efb2910c476dab54c6f
+- conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-1.7.0-py_0.conda
+  sha256: c00d46754d823f3d17c845a74376ef93d6c456f970f92ebe96d397ed2fb63958
+  md5: cb37c103baaf25574f2ba67c8b5ff2f1
   depends:
   - numpy
   - pyserial
   - python >=3.11
   - tqdm
   license: Proprietary
-  size: 608887
-  timestamp: 1794938500797
-- conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.6.1-py_0.conda
-  sha256: 677e391bd80e4540d5684acaaecc359adf03d7435f3480b12b9fe37ba836e64d
-  md5: b93d51de8023b81dfb425b2b92e02937
+  size: 647872
+  timestamp: 1795042221157
+- conda: https://conda.anaconda.org/alexsk/noarch/dropbot-portable-ui-1.7.0-py_0.conda
+  sha256: 572fe859d2bd537beca26322acc159ade2001fcce0cf19297328abbf55b003f8
+  md5: b56fb714347fe6a2ecd2cc33c11a7629
   depends:
-  - dropbot-portable 1.6.1.*
+  - dropbot-portable 1.7.0.*
+  - matplotlib-base >=3.5
   - pyqtgraph >=0.11
   - python >=3.11
   constrains:
   - pyside6 >=6.8
   license: Proprietary
-  size: 393184
-  timestamp: 1794938617789
+  size: 411263
+  timestamp: 1795042340053
 - conda: https://conda.anaconda.org/alexsk/noarch/hv-switching-board-0.19-py_0.conda
   sha256: 5f267428274e4c4ebc69a026fa51421a056fef480f6baeca8000a2829d16a6a1
   md5: 9fd60c9fc8bed18787b0dd93b307442c
