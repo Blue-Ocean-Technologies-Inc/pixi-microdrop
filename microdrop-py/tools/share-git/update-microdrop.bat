@@ -26,6 +26,23 @@ for /f "usebackq delims=" %%V in (`git -C microdrop describe --tags --always`) d
 echo Updating MicroDrop (currently %BEFORE%)...
 echo.
 
+rem MicroDrop's Updates panel can pin the clone to a release tag, leaving no
+rem branch checked out, where pull cannot run. This script always means
+rem "get me the newest code", so return to main first.
+git -C microdrop symbolic-ref -q HEAD >nul 2>&1
+if errorlevel 1 (
+    echo MicroDrop is on a pinned version - returning to the latest code...
+    git -C microdrop checkout main
+    if errorlevel 1 (
+        echo.
+        echo ERROR: the checkout of main failed. If the message above mentions
+        echo local changes, the files in .\microdrop were edited - unzip a fresh
+        echo copy of the download to start clean.
+        goto :fail
+    )
+    echo.
+)
+
 rem --ff-only: only ever move forward along main. If the clone was edited
 rem locally, this stops rather than merging, and says so.
 git -C microdrop pull --ff-only
