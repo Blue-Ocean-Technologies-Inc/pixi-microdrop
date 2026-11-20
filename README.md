@@ -37,11 +37,12 @@ asset by `uname -m`; macOS first-launch approval of the unsigned app).
 
 With [pixi](https://pixi.sh/dev/installation) and git installed and the repo
 cloned (`git clone --recursive https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop.git`),
-the scripts at the repo root update the checkout and launch the app:
+the scripts at the repo root update pixi and launch the app. They leave the
+MicroDrop source checkout alone — the app manages its own source updates.
 
 - **Windows:** double-click `microdrop.bat` (DropBot) or
   `opendrop-microdrop.bat` (OpenDrop). Both run `run_microdrop.ps1`, which
-  stashes local changes, pulls this repo and the submodule, then launches.
+  runs `pixi self-update`, then launches.
 - **Mac/Linux:** `sh run_microdrop.sh` (same self-update, then launch).
 
 ## Manual way

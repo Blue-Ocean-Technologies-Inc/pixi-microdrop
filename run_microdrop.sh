@@ -55,40 +55,12 @@ echo -e "${CYAN}Updating pixi...${NC}"
 pixi self-update || echo -e "${YELLOW}Warning: pixi self-update failed. Continuing with the current version...${NC}"
 echo -e "${CYAN}----------------------------------------${NC}"
 
-# --- Step 1: Update Parent Module (microdrop-py) ---
-if [ -d "$PARENT_PATH" ]; then
-    echo -e "${YELLOW}Updating Parent Module: $PARENT_PATH${NC}"
-    cd "$PARENT_PATH" || exit 1
-
-    echo -e "${YELLOW}Stashing uncommitted changes in parent module...${NC}"
-#    pixi run git stash
-
-    echo -e "${CYAN}Running 'pixi run git pull' on parent...${NC}"
-#    pixi run git pull || echo -e "${YELLOW}Warning: Could not pull parent module. Continuing...${NC}"
-    echo -e "${CYAN}----------------------------------------${NC}"
-else
-    echo -e "${YELLOW}Warning: Parent path not found at $PARENT_PATH${NC}"
-fi
-
-# --- Step 2: Update Source & Run Microdrop (microdrop-py/src) ---
+# --- Run Microdrop (microdrop-py/src) ---
+# The source checkout is left untouched: MicroDrop manages its own source
+# updates, including staying on a pinned release.
 if [ -d "$TARGET_PATH" ]; then
     echo -e "${YELLOW}Navigating to Source: $TARGET_PATH${NC}"
     cd "$TARGET_PATH" || exit 1
-
-    echo -e "${YELLOW}Stashing uncommitted changes in src module...${NC}"
-    pixi run git stash
-
-    # A freshly-initialized submodule sits on a detached HEAD, where
-    # `git pull` refuses to run — force a checkout of main in that case.
-    SRC_BRANCH=$(pixi run git branch --show-current)
-    if [ -z "$SRC_BRANCH" ]; then
-        echo -e "${YELLOW}No branch checked out in src (detached HEAD); checking out main...${NC}"
-        pixi run git checkout main || echo -e "${YELLOW}Warning: Could not check out main. Continuing...${NC}"
-    fi
-
-    echo -e "${CYAN}Checking for src updates on current branch...${NC}"
-    pixi run git pull
-    echo -e "${CYAN}----------------------------------------${NC}"
 
     # --- Launch System Redis if requested ---
     if [ "$USE_SYSTEM_REDIS" = true ]; then
