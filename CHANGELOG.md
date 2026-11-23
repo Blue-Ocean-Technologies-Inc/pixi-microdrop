@@ -1,3 +1,10 @@
+## [v0.8.2](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.8.2) (2026-11-23)
+
+### Fix
+
+- **share**: return to main in update-microdrop.bat ([`d500a9c`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/d500a9c21b158c976a3e22ac8052efc465557499))
+- stop launch scripts pulling the source ([`6316019`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/6316019fcb144db784616a48f9a58bb25f34ce72))
+
 ## [v0.8.1](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.8.1) (2026-11-09)
 
 ### Fix
