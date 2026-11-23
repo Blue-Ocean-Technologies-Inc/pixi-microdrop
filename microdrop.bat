@@ -10,7 +10,7 @@ ECHO.
 
 :: "%~dp0" refers to the folder where this .bat file is located.
 :: It looks for ".ps1" in that same folder.
-PowerShell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0run_microdrop.ps1" -Stash
+PowerShell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0run_microdrop.ps1"
 
 :: If the script finishes instantly, this pause lets you see errors.
 PAUSE
