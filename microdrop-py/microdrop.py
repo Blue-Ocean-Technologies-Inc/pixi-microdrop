@@ -48,6 +48,12 @@ from examples.run_device_viewer_pluggable import main
 #: stack, which only a portable run needs (src loads them lazily).
 PORTABLE_DROPBOT_BACKEND_PLUGIN_NAMES = ("PortableDropbotControllerPlugin",)
 
+#: Frontend plugins started after the main window paints, as ``DeferredPlugin``
+#: declarations that ``main`` accepts alongside plugin classes. Src before
+#: Microdrop v1.48 has no such list and keeps these plugins in
+#: FRONTEND_PLUGINS.
+DEFERRED_FRONTEND_PLUGINS = getattr(plugin_consts, "DEFERRED_FRONTEND_PLUGINS", [])
+
 
 def _load_portable_dropbot_backend_plugins():
     """Import the portable backend plugin classes on first use.
@@ -64,8 +70,17 @@ def _load_portable_dropbot_backend_plugins():
 
 
 def _plugin_name(plugin):
-    """A plugin class's name; lazily loaded plugins are listed by name."""
-    return plugin if isinstance(plugin, str) else plugin.__name__
+    """A plugin class's name; lazily loaded plugins are listed by name.
+
+    A deferred plugin goes by the class part of its ``module:Class`` spec.
+    """
+    if isinstance(plugin, str):
+        return plugin
+
+    if plugin in DEFERRED_FRONTEND_PLUGINS:
+        return plugin.spec.partition(":")[2]
+
+    return plugin.__name__
 
 
 # Canonical load order — plugin_consts order decides Envisage service
@@ -77,6 +92,7 @@ _ORDERED_OPTIONAL_GROUPS = (
     OPENDROP_FRONTEND_PLUGINS,
     MOCK_DROPBOT_FRONTEND_PLUGINS,
     SERVICE_PLUGINS,
+    DEFERRED_FRONTEND_PLUGINS,
     BACKEND_PLUGINS,
     DROPBOT_BACKEND_PLUGINS,
     PORTABLE_DROPBOT_BACKEND_PLUGIN_NAMES,
@@ -92,13 +108,15 @@ _FRONTEND_PLUGIN_SET = frozenset(
         PORTABLE_DROPBOT_FRONTEND_PLUGINS,
         OPENDROP_FRONTEND_PLUGINS,
         MOCK_DROPBOT_FRONTEND_PLUGINS,
+        DEFERRED_FRONTEND_PLUGINS,
     )
     for plugin in group
 )
 
 # name -> class, in canonical order (setdefault keeps the first position of
-# a plugin that appears in more than one group); None for a plugin imported
-# only when selected (see _resolve_plugin)
+# a plugin that appears in more than one group); the DeferredPlugin itself
+# for a deferred one; None for a plugin imported only when selected (see
+# _resolve_plugin)
 OPTIONAL_PLUGINS = {}
 for _group in _ORDERED_OPTIONAL_GROUPS:
     for _plugin in _group:
@@ -129,7 +147,7 @@ def _default_plugin_names(device):
     groups = (
         [FRONTEND_PLUGINS]
         + _DEVICE_FRONTEND_GROUPS[device]
-        + [SERVICE_PLUGINS, BACKEND_PLUGINS]
+        + [SERVICE_PLUGINS, DEFERRED_FRONTEND_PLUGINS, BACKEND_PLUGINS]
         + _DEVICE_BACKEND_GROUPS[device]
     )
     return [_plugin_name(plugin) for group in groups for plugin in group]
@@ -155,15 +173,20 @@ def resolve_run_config(device="dropbot", plugin_names=None, context_names=None):
     Empty/None ``plugin_names`` means "the full default set for *device*";
     empty/None ``context_names`` means "infer from the selection" (redis +
     workers for a frontend, workers only for a backend-only selection).
+
+    Unknown plugin names (a saved selection naming a plugin this source
+    checkout no longer has) are skipped with a warning rather than blocking
+    the launch.
     """
+    unknown = sorted(set(plugin_names or ()) - OPTIONAL_PLUGINS.keys())
+
+    if unknown:
+        print(f"Warning: ignoring unknown plugins: {', '.join(unknown)}")
+        plugin_names = [name for name in plugin_names if name in OPTIONAL_PLUGINS]
+
     if not plugin_names:
         plugin_names = _default_plugin_names(device)
-    unknown = sorted(set(plugin_names) - OPTIONAL_PLUGINS.keys())
-    if unknown:
-        raise ValueError(
-            f"Unknown plugins: {', '.join(unknown)}. "
-            f"Valid names: {', '.join(OPTIONAL_PLUGINS)}"
-        )
+
     selected = set(plugin_names)
     optional = [_resolve_plugin(name) for name in OPTIONAL_PLUGINS if name in selected]
     has_frontend = any(plugin in _FRONTEND_PLUGIN_SET for plugin in optional)
@@ -215,9 +238,8 @@ if __name__ == "__main__":
         "--plugins",
         nargs="+",
         metavar="PLUGIN",
-        choices=sorted(OPTIONAL_PLUGINS),
         help="Optional plugin class names to load (required plugins are "
-        "always loaded).",
+        "always loaded; unknown names are skipped with a warning).",
     )
     parser.add_argument(
         "--contexts",
