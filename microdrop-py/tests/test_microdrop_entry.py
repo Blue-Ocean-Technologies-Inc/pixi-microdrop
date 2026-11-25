@@ -35,6 +35,7 @@ def test_default_matches_full_dropbot_set():
             + FRONTEND_PLUGINS
             + DROPBOT_FRONTEND_PLUGINS
             + SERVICE_PLUGINS
+            + entry.DEFERRED_FRONTEND_PLUGINS
             + BACKEND_PLUGINS
             + DROPBOT_BACKEND_PLUGINS
         )
@@ -73,9 +74,11 @@ def test_contexts_override_beats_inference():
     assert cfg["contexts"] == REQUIRED_CONTEXT
 
 
-def test_unknown_plugin_raises():
-    with pytest.raises(ValueError, match="NopePlugin"):
-        entry.resolve_run_config(plugin_names=["NopePlugin"])
+def test_unknown_plugin_is_skipped_with_a_warning(capsys):
+    cfg = entry.resolve_run_config(plugin_names=["NopePlugin"])
+
+    assert cfg == entry.resolve_run_config()
+    assert "NopePlugin" in capsys.readouterr().err
 
 
 def test_unknown_context_raises():
