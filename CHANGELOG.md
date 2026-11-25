@@ -1,3 +1,9 @@
+## [v0.8.3](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.8.3) (2026-11-25)
+
+### Fix
+
+- **launcher**: accept deferred plugins and skip unknown ones ([`45f640c`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/45f640c96d7c25dccb39beefe91e594c2b7992a9))
+
 ## [v0.8.2](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.8.2) (2026-11-23)
 
 ### Fix
