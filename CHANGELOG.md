@@ -1,3 +1,9 @@
+## [v0.8.4](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.8.4) (2026-11-27)
+
+### Fix
+
+- **hooks**: install pre-commit on Python 3.13 ([`263cff9`](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/commit/263cff91b2634bc810b28396380f785a2969853a))
+
 ## [v0.8.3](https://github.com/Blue-Ocean-Technologies-Inc/pixi-microdrop/releases/tag/v0.8.3) (2026-11-25)
 
 ### Fix
